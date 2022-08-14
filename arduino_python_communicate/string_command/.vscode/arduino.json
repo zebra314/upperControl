@@ -2,5 +2,5 @@
     "port": "COM6",
     "board": "arduino:avr:uno",
     "programmer": "arduino:usbasp",
-    "sketch": "arduinio_command_and_read\\arduinio_command_and_read.ino"
+    "sketch": "arduinio_command_and_read_string\\arduinio_command_and_read_string.ino"
 }

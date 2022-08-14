@@ -1,0 +1,6 @@
+{
+    "port": "COM6",
+    "board": "arduino:avr:uno",
+    "programmer": "arduino:usbasp",
+    "sketch": "arduinio_command_and_read_int\\arduinio_command_and_read_int.ino"
+}
