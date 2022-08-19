@@ -51,7 +51,7 @@ def select_COMport():
         try:
             #val = input("Select Port (COM#, usbtty#) :") # 測試時方便先註解掉
             #COM_PORT = str(val)
-            COM_PORT = 'COM8'
+            COM_PORT = 'COM6'
             BAUD_RATES = 57600
             serial = serial.Serial(COM_PORT, BAUD_RATES)
             error = 0
@@ -75,5 +75,5 @@ if __name__ == '__main__':
         print('\nend')
         exit()
 
-# d3 下網前
+# d3 下網後
 # t3 上網後

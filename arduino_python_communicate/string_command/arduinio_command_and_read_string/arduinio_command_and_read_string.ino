@@ -1,8 +1,8 @@
 // topStepper ,  downStepper
-const byte topStepper_CLK = 2; // step 
-const byte topStepper_CW  = 7;  // direction
-const byte downStepper_CLK = 4; // step
-const byte downStepper_CW  = 21;  // direction
+const byte topStepper_CLK = 52; // step 
+const byte topStepper_CW  = 50;  // direction
+const byte downStepper_CLK = 44; // step
+const byte downStepper_CW  = 46;  // direction
 
 // Pusher
 const byte Pusher_ENA = 11;
@@ -10,10 +10,10 @@ const byte Pusher_IN1 = 9;
 const byte Pusher_IN2 = 12;
  
 // rDCmotor 右馬達,  lDCmotor 左馬達 => flywheel
-const byte rDCmotor_IN1 =  8; //speed 
-const byte rDCmotor_IN2 = 44; //direction
-const byte lDCmotor_IN1 = 10; //speed 
-const byte lDCmotor_IN2 = 50; //direction
+const byte rDCmotor_IN1 = 3; //speed 
+const byte rDCmotor_IN2 = 24; //direction
+const byte lDCmotor_IN1 = 2; //speed 
+const byte lDCmotor_IN2 = 22; //direction
 
 String message;
 int topStepper_status;
@@ -69,7 +69,7 @@ void downStepper_task(int status) //Stepper 下
     }
     else if (status == 2) // counterclockwise(?
     {
-        digitalWrite(downStepper_CW, LOW);
+        digitalWrite(downStepper_CW, HIGH);
         digitalWrite(downStepper_CLK, HIGH);
         delayMicroseconds(500);
         digitalWrite(downStepper_CLK, LOW);
@@ -77,7 +77,8 @@ void downStepper_task(int status) //Stepper 下
     }
     else if (status == 3) // clockwise(?
     {
-        digitalWrite(downStepper_CW, HIGH);
+
+        digitalWrite(downStepper_CW, LOW);
         digitalWrite(downStepper_CLK, HIGH);
         delayMicroseconds(500);
         digitalWrite(downStepper_CLK, LOW);
