@@ -1,0 +1,7 @@
+{
+    "configuration": "cpu=atmega2560",
+    "board": "arduino:avr:mega",
+    "sketch": "816motor_test.ino",
+    "port": "COM8",
+    "programmer": "arduino:usbasp"
+}

@@ -1,137 +1,204 @@
-#include<Servo.h> 
-//a Stepper
-//b Pusher
-//c DC motor 
-#define a_CLK 2 //step
-#define a_CW 7 //direction
-#define b_ENA 11
-#define b_IN1 9
-#define b_IN2 10
-#define c_IN1 6 //speed
-#define c_IN2 5 //direction
+// topStepper ,  downStepper
+const byte topStepper_CLK = 2; // step 
+const byte topStepper_CW  = 7;  // direction
+const byte downStepper_CLK = 4; // step
+const byte downStepper_CW  = 21;  // direction
 
-Servo myservo;
+// Pusher
+const byte Pusher_ENA = 11;
+const byte Pusher_IN1 = 9;
+const byte Pusher_IN2 = 12;
+ 
+// rDCmotor 右馬達,  lDCmotor 左馬達 => flywheel
+const byte rDCmotor_IN1 =  8; //speed 
+const byte rDCmotor_IN2 = 44; //direction
+const byte lDCmotor_IN1 = 10; //speed 
+const byte lDCmotor_IN2 = 50; //direction
 
-int a_status; //Stepper
-int b_status; //Pusher
-int c_status; //DC motor
-int t_status; //test servo
+String message;
+int topStepper_status;
+int downStepper_status;
+int Pusher_status;
+int flywheel_status;
 
 void setup()
 {
-    Serial.begin(9600);
-    pinMode(a_CLK, OUTPUT);
-    pinMode(a_CW, OUTPUT);
-    pinMode(b_ENA,OUTPUT);
-    pinMode(b_IN1,OUTPUT);
-    pinMode(b_IN2,OUTPUT);
-    myservo.attach(3); 
+    Serial.begin(57600);
+    pinMode(topStepper_CLK, OUTPUT);
+    pinMode(topStepper_CW,  OUTPUT);
+    pinMode(downStepper_CLK, OUTPUT);
+    pinMode(downStepper_CW,  OUTPUT);
+    pinMode(Pusher_ENA, OUTPUT);
+    pinMode(Pusher_IN1, OUTPUT);
+    pinMode(Pusher_IN2, OUTPUT);
+    pinMode(rDCmotor_IN1, OUTPUT);
+    pinMode(rDCmotor_IN2, OUTPUT);
+    pinMode(lDCmotor_IN1, OUTPUT);
+    pinMode(lDCmotor_IN2, OUTPUT);
 }
 
-// directions not confirm yet
-void a_task(int status)
+void topStepper_task(int status)  //Stepper 上
 {
-    if(status == 1) //stop
+    if (status == 1) // stop
     {
-        digitalWrite(a_CLK, LOW);
+        digitalWrite(topStepper_CLK, LOW);
     }
-    else if (status == 2) //counterclockwise
+    else if (status == 2) //出 
     {
-        digitalWrite(a_CW, LOW);
-        digitalWrite(a_CLK, HIGH);
+        digitalWrite(topStepper_CW, LOW);
+        digitalWrite(topStepper_CLK, HIGH);
+        delayMicroseconds(700);
+        digitalWrite(topStepper_CLK, LOW);
+        delayMicroseconds(700);
+    }
+    else if (status == 3) //進
+    {
+        digitalWrite(topStepper_CW, HIGH);
+        digitalWrite(topStepper_CLK, HIGH);
+        delayMicroseconds(700);
+        digitalWrite(topStepper_CLK, LOW);
+        delayMicroseconds(700);
+    }
+}
+
+void downStepper_task(int status) //Stepper 下
+{
+    if (status == 1) // stop
+    {
+        digitalWrite(downStepper_CLK, LOW);
+    }
+    else if (status == 2) // counterclockwise(?
+    {
+        digitalWrite(downStepper_CW, LOW);
+        digitalWrite(downStepper_CLK, HIGH);
         delayMicroseconds(500);
-        digitalWrite(a_CLK, LOW);
+        digitalWrite(downStepper_CLK, LOW);
         delayMicroseconds(500);
     }
-    else if (status == 3 ) //clockwise
+    else if (status == 3) // clockwise(?
     {
-        digitalWrite(a_CW, HIGH);
-        digitalWrite(a_CLK, HIGH);
+        digitalWrite(downStepper_CW, HIGH);
+        digitalWrite(downStepper_CLK, HIGH);
         delayMicroseconds(500);
-        digitalWrite(a_CLK, LOW);
+        digitalWrite(downStepper_CLK, LOW);
         delayMicroseconds(500);
     }
 }
 
-void b_task(int status )
+/*void s_task(int status)
 {
-    if(status == 1) //stop
+    if (status == 3)  //上 微調後
     {
-        digitalWrite(b_IN1,LOW);
-        digitalWrite(b_IN2,LOW);
-        analogWrite(b_ENA,0);
+        for(int i =0;i<50;i++)
+        {
+            digitalWrite(a_CW, HIGH);
+            digitalWrite(a_CLK, HIGH);
+            delayMicroseconds(700);
+            digitalWrite(a_CLK, LOW);
+            delayMicroseconds(700);
+        }
+        message  = "" ;
+    }
+    else if(status == 2) //上 微調前
+    {
+        for(int i =0;i<50;i++)
+        {
+            digitalWrite(a_CW, LOW);
+            digitalWrite(a_CLK, HIGH);
+            delayMicroseconds(700);
+            digitalWrite(a_CLK, LOW);
+            delayMicroseconds(700);
+        }
+        message = "";
+    }
+}*/
+
+void Pusher_task(int status) // pusher 1
+{
+    if (status == 1) // stop
+    {
+        digitalWrite(Pusher_IN1, LOW);
+        digitalWrite(Pusher_IN2, LOW);
+        analogWrite(Pusher_ENA, 0);
     }
     else if (status == 2) //縮短
     {
-        digitalWrite(b_IN1,HIGH);
-        digitalWrite(b_IN2,LOW);
-        analogWrite(b_ENA,200);
+        digitalWrite(Pusher_IN1, HIGH);
+        digitalWrite(Pusher_IN2, LOW);
+        analogWrite(Pusher_ENA, 240);
     }
     else if (status == 3) //伸長
     {
-        digitalWrite(b_IN1,LOW);
-        digitalWrite(b_IN2,HIGH);
-        analogWrite(b_ENA,200);
+        digitalWrite(Pusher_IN1, LOW);
+        digitalWrite(Pusher_IN2, HIGH);
+        analogWrite(Pusher_ENA, 240);
     }
 }
 
-void c_task(int status)
+#define speed 180
+void flywheel_task(int status) //flywheel
 {
-    if(status == 1) //stop
+    if (status == 1) // stop
     {
-
+        analogWrite(rDCmotor_IN1, 0);
+        digitalWrite(rDCmotor_IN2, LOW);
+        analogWrite(lDCmotor_IN1, 0);
+        digitalWrite(lDCmotor_IN2, LOW);
     }
-    else if (status == 2) //counterclockwise
+    else if (status == 2) // 噴
     {
-
+        analogWrite(rDCmotor_IN1, speed);
+        digitalWrite(rDCmotor_IN2, LOW);
+        analogWrite(lDCmotor_IN1, speed);
+        digitalWrite(lDCmotor_IN2, HIGH);
     }
-    else if (status == 3) //clockwise
+    else if (status == 3) // 吸
     {
-
+        analogWrite(rDCmotor_IN1, speed);
+        digitalWrite(rDCmotor_IN2, HIGH);
+        analogWrite(lDCmotor_IN1, speed);
+        digitalWrite(lDCmotor_IN2, LOW);
     }
 }
 
-void t_task(int status)
+void action(String message)
 {
-    if(status == 1) //stop
+    char motor_type = message[0];
+    char motor_status = message[1];
+    switch (motor_type)
     {
-        myservo.write(90);
-    }
-    else if (status == 2) 
-    {
-        myservo.write(0);
-    }
-    else if (status == 3) 
-    {
-        myservo.write(180);
+        case 't': //上
+            topStepper_status = int(motor_status - '0');
+            break;
+        case 'd': //下
+            downStepper_status = int(motor_status - '0');
+            break;
+        case 'p': //推桿
+            Pusher_status = int(motor_status - '0');
+            break;
+        case 'f': //飛輪
+            flywheel_status = int(motor_status - '0');  
+            break; 
+        /*case 's': //上微調
+            s_task(int(motor_status - '0')); 出包*/
     }
 }
 
-void action(String  message)
+void motorMove()
 {
-    char motor_type = message[0] ; 
-    char motor_status = message[1]; 
-
-    switch( motor_type ) 
-        {
-            case 'a':
-                a_task(int(motor_status - '0')); 
-            case 'b':
-                b_task(int(motor_status - '0'));
-            case 'c':
-                c_task(int(motor_status - '0'));
-            case 't':
-                t_task(int(motor_status - '0'));
-        }
+    topStepper_task(topStepper_status);
+    downStepper_task(downStepper_status);
+    Pusher_task(Pusher_status);
+    flywheel_task(flywheel_status); 
 }
 
 void loop()
 {
-    //int length;
-    if (Serial.available() > 0 )
+    if (Serial.available() > 0)
     {
-        String message = Serial.readString();
+        message = Serial.readString();
         Serial.println(message);
         action(message);
-    } 
+    }
+    motorMove();
 }

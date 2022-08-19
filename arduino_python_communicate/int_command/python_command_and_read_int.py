@@ -20,12 +20,15 @@ def send_message(string):
 # motor type (1,2,3) + action (1,2,3) 
 # ex: 11 , 21 , 33
 def command():
+    error = 1
     actions = ['11','12','13','21','22','23','31','32','33','41','42','43']
-    command = input("command: ").lower()
-    if(command in actions):
-        send_message(command)
-    else:
-        print('wrong')
+    while(error == 1):
+        command = input("command: ").lower()
+        if(command in actions):
+            send_message(command)
+            error =0
+        else:
+            print('invalid command')
 
 def stop_all_motor():
     stops = ['11','21','31','41']  

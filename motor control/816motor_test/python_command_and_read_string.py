@@ -20,14 +20,15 @@ def send_message(string):
     print('Message from user: ' + string)
     sleep(2)
 
-
-# topStepper = t , downStepper = d , Pusher = p , flywheel  = f
-# 1= stop , 2 , 3
-# motor type (t,d,p,f) + action (1,2,3)
-# ex: t1 , d1 , f3
+# Stepper = a , Pusher = b , Brushless DC motor = c
+# 1= stop , 2 = counterclockwise , 3 = clockwise
+# motor type (a,b,c) + action (1,2,3)
+# ex: a1 , b1 , c3
 def command():
     error = 1
-    actions = ['t1','t2','t3','d1','d2','d3','p1','p2','p3','f1','f2','f3']
+    actions = ['a1', 'a2', 'a3','e1', 'e2', 'e3', 'b1', 'b2','b3', 
+                'c1', 'c2', 'c21','c22','c23','c24','c25', 'c3','c31','c32','c33','c34','c35', 
+                'd1', 'd2', 'd21','d22','d23','d24','d25', 'd3','d31','d32','d33','d34','d35',]
     while (error == 1):
         command = input("command: ").lower()
         if (command in actions):
@@ -38,33 +39,15 @@ def command():
 
 # stop all motor
 def stop_all_motor():
-    stops = ['t1','d1' ,'p1', 'f1']
+    stops = ['a1','e1' ,'b1', 'c1', 'd1']
     for motor in stops:
         serial.write(bytes(motor, 'utf-8'))
         sleep(2)
         
-# select the COM port manually
-def select_COMport():
-    global serial
-    error = 1
-    while (error == 1):
-        try:
-            #val = input("Select Port (COM#, usbtty#) :") # 測試時方便先註解掉
-            #COM_PORT = str(val)
-            COM_PORT = 'COM8'
-            BAUD_RATES = 57600
-            serial = serial.Serial(COM_PORT, BAUD_RATES)
-            error = 0
-        except KeyboardInterrupt:
-            print('\nend')
-            exit()
-        except:
-            print("failed to connect " + COM_PORT)
-    print(COM_PORT + " connected")
-    sleep(2)
+
+serial = serial.Serial('COM6', 57600)
 
 if __name__ == '__main__':
-    select_COMport()
     try:
         while True:
             command()
@@ -74,6 +57,3 @@ if __name__ == '__main__':
         serial.close()
         print('\nend')
         exit()
-
-# d3 下網前
-# t3 上網後
