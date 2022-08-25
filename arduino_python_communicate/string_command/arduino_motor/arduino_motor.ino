@@ -136,7 +136,8 @@ void Pusher_task(int status) // pusher 1
     }
 }
 
-#define speed 180
+#define speedIn 180
+#define speedOut 180
 void flywheel_task(int status) //flywheel
 {
     if (status == 1) // stop
@@ -148,16 +149,16 @@ void flywheel_task(int status) //flywheel
     }
     else if (status == 2) // 噴
     {
-        analogWrite(rDCmotor_IN1, speed);
+        analogWrite(rDCmotor_IN1, speedOut);
         digitalWrite(rDCmotor_IN2, LOW);
-        analogWrite(lDCmotor_IN1, speed);
+        analogWrite(lDCmotor_IN1, speedOut);
         digitalWrite(lDCmotor_IN2, HIGH);
     }
     else if (status == 3) // 吸
     {
-        analogWrite(rDCmotor_IN1, speed);
+        analogWrite(rDCmotor_IN1, speedIn);
         digitalWrite(rDCmotor_IN2, HIGH);
-        analogWrite(lDCmotor_IN1, speed);
+        analogWrite(lDCmotor_IN1, speedIn);
         digitalWrite(lDCmotor_IN2, LOW);
     }
 }
