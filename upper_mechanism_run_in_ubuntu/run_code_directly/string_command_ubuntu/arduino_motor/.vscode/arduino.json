@@ -1,0 +1,8 @@
+{
+    "port": "COM8",
+    "board": "arduino:avr:mega",
+    "programmer": "arduino:usbasp",
+    "sketch": "arduinio_command_and_read_string.ino",
+    "output": "../build",
+    "configuration": "cpu=atmega2560"
+}
