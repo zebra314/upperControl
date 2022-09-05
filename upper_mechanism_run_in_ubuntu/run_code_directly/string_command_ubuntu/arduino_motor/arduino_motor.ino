@@ -199,7 +199,7 @@ void loop()
 {
     if (Serial.available() > 0)
     {
-        message = "arduino :" + Serial.readString();
+        message = Serial.readString();
         action(message);
         Serial.println(message);
     }

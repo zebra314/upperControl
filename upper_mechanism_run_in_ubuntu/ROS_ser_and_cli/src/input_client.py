@@ -5,11 +5,11 @@ from test.srv import action,actionResponse
 def client(msg):
     msg_to_server = rospy.ServiceProxy("action",action) 
     response = msg_to_server(msg)
-    rospy.loginfo(response.response)
+    print(response.response)
     rate.sleep()
 
 if __name__ == '__main__':
-    rospy.init_node('upper_mechanism_client')
+    rospy.init_node('upper_mechanism_client_test')
     rospy.wait_for_service("action")
     rate = rospy.Rate(1000) # 10Hz
     while not rospy.is_shutdown():

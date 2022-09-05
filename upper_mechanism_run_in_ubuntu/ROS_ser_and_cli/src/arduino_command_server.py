@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# this program get the msg from ros topic ,which we manually input ,and then send it to arduino.
+# this program get the msg from client ,which we manually input ,and then send it to arduino.
 import rospy
 from std_msgs.msg import String
 import serial 
@@ -13,10 +13,10 @@ def callback(request):
         # 如果 client 的 request 滿足要求 , send it to arduino
         ser.write(bytes(request.request, 'utf-8'))
         arduino_echo = "Arduino :" + ser.readline().decode('utf').strip()
-        rospy.loginfo(arduino_echo)
+        print(arduino_echo)
 
     else :
-        rospy.loginfo('invalid command')
+        print('Arduino :invalid command')
         
     # 回傳response 給 client
     return actionResponse(request.request) 
@@ -24,7 +24,7 @@ def callback(request):
 
 if __name__ == '__main__':
 
-    rospy.init_node('upper_mechanism_server')
+    rospy.init_node('upper_mechanism')
     
     # connect to arduino board
     ser = serial.Serial('/dev/ttyUSB0',57600)
@@ -33,7 +33,7 @@ if __name__ == '__main__':
 
     # if arduino is ready , we will received "Ready"
     arduino_echo = "Arduino :" + ser.readline().decode('utf').strip()
-    rospy.loginfo(arduino_echo) 
+    print(arduino_echo) 
     
     try:
         while True:
@@ -44,5 +44,5 @@ if __name__ == '__main__':
 
     except rospy.ROSInterruptException:
         ser.close()
-        rospy.loginfo('\nend')
+        print('\nend')
         exit()

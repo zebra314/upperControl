@@ -1,17 +1,23 @@
 import rospy
 from std_msgs.msg import String
-def talker():
+from test.srv import action,actionResponse
 
-    rospy.init_node('upper_mechanism_client')
-    rate = rospy.Rate(1000) # 10Hz
-    while not rospy.is_shutdown():
-        msg = input()
-        rospy.loginfo(msg)
-
-        rate.sleep()
+def client(msg):
+    msg_to_server = rospy.ServiceProxy("action",action) 
+    response = msg_to_server(msg)
+    print(response.response)
+    rate.sleep()
 
 if __name__ == '__main__':
-    try:
-        talker()
-    except rospy.ROSInterruptException:
-        pass
+    rospy.init_node('upper_mechanism_client_test')
+    rospy.wait_for_service("action")
+    rate = rospy.Rate(1000) # 10Hz
+    while not rospy.is_shutdown():
+        try:
+            # input the command manually 
+            command = input("command :")
+            client(command)
+        except rospy.ServiceException :
+            pass
+    
+
