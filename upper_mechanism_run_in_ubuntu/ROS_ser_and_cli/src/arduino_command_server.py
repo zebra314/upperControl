@@ -1,22 +1,33 @@
 #!/usr/bin/env python
-# this program get the msg from client ,which we manually input ,and then send it to arduino.
+# this program get the msg sended from client ,which we manually input ,and then send it to arduino
+
 import rospy
-from std_msgs.msg import String
+from std_msgs.msg import Int8
 import serial 
 from time import sleep
-from test.srv import action,actionResponse 
+from upper_control.srv import action,actionResponse 
+
+'''
+    The representations of actions:
+    0 , standard position
+    1 , taking basketball
+    2 , throwing basketball
+    3 , taking bowling
+    4 , relasing bowling
+'''
 
 def callback(request):
-    actions = ['t1','t2','t3','d1','d2','d3','p1','p2','p3','f1','f2','f3']
+    actions = [0,1,2,3,4]
     if(request.request in actions): 
         
         # 如果 client 的 request 滿足要求 , send it to arduino
-        ser.write(bytes(request.request, 'utf-8'))
-        arduino_echo = "Arduino :" + ser.readline().decode('utf').strip()
-        print(arduino_echo)
-
+        ser.write(bytes(str(request.request), 'utf-8'))
+        arduino_echo = ser.readline().decode('utf').strip()
+        print("Arduino :" , arduino_echo)
     else :
+
         print('Arduino :invalid command')
+        request.request = -1
         
     # 回傳response 給 client
     return actionResponse(request.request) 
