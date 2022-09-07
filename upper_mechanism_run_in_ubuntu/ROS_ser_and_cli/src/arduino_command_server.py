@@ -17,7 +17,7 @@ from upper_control.srv import action,actionResponse
 '''
 
 def callback(request):
-    actions = [0,1,2,3,4]
+    actions = [11,12,13,21,22,23,31,32,33,41,42,43,5]
     if(request.request in actions): 
         
         # 如果 client 的 request 滿足要求 , send it to arduino
