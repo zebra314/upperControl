@@ -22,6 +22,7 @@ const byte topfLimswit = A0; //上前
 const byte topbLimswit = A1; //上後
 const byte downfLimswit = A2; //下前
 const byte downbLimswit = A3; //下後
+const byte pusherLimswit = A4;
 
 String message;
 int topStepper_status;
@@ -47,47 +48,8 @@ void setup()
     pinMode(topbLimswit, INPUT_PULLUP);
     pinMode(downfLimswit, INPUT_PULLUP);
     pinMode(downbLimswit, INPUT_PULLUP);
+    pinMode(pusherLimswit, INPUT_PULLUP);
 }
-
-//限位開關
-/*
-void Limswitch()
-{
-    if(topfLimswit == 0)
-    {
-        digitalWrite(downStepper_CLK, LOW);
-        delay(500);
-        for(int i = 0 ; i<= 100 ; i++ )
-        {
-            digitalWrite(topStepper_CW, HIGH);
-            digitalWrite(topStepper_CLK, HIGH);
-            delayMicroseconds(700);
-            digitalWrite(topStepper_CLK, LOW);
-            delayMicroseconds(700);
-        }
-    }
-    else if(topbLimswit == 0)
-    {
-        digitalWrite(downStepper_CLK, LOW);
-        delay(500);
-        for(int i = 0 ; i<= 100 ; i++ )
-        {
-            digitalWrite(topStepper_CW, LOW);
-            digitalWrite(topStepper_CLK, HIGH);
-            delayMicroseconds(700);
-            digitalWrite(topStepper_CLK, LOW);
-            delayMicroseconds(700);
-        }
-    }
-    if(downfLimswit == 0)
-    {
-        ;
-    }
-    else if(downbLimswit == 0)
-    {
-        ;
-    }
-}*/
 
 void topStepper_task(int status)  //Stepper 上
 {
@@ -135,28 +97,6 @@ void downStepper_task(int status) //Stepper 下
         delayMicroseconds(500);
         digitalWrite(downStepper_CLK, LOW);
         delayMicroseconds(500);
-    }
-}
-
-void Pusher_task(int status) 
-{
-    if (status == 1) // stop
-    {
-        digitalWrite(Pusher_IN1, LOW);
-        digitalWrite(Pusher_IN2, LOW);
-        analogWrite(Pusher_ENA, 0);
-    }
-    else if (status == 2) //縮短
-    {
-        digitalWrite(Pusher_IN1, HIGH);
-        digitalWrite(Pusher_IN2, LOW);
-        analogWrite(Pusher_ENA, 100);
-    }
-    else if (status == 3) //伸長
-    {
-        digitalWrite(Pusher_IN1, LOW);
-        digitalWrite(Pusher_IN2, HIGH);
-        analogWrite(Pusher_ENA, 100);
     }
 }
 
@@ -210,20 +150,45 @@ void PusherStop()
 
 void takeBasket()
 {
-    PusherDown(); //縮短到底
-    delay(4000);
+    while(digitalRead(pusherLimswit) ! = 0)
+    {
+        PusherDown(); 
+    }
+    PusherStop();
+    delay(200);
+
     for(int i = 0 ; i<3 ; i++)
     {
         PusherUp(); //伸長
         delay(3000);
         PusherStop();
-        delay(500);
-        PusherDown(); //縮短到底
-        delay(4000);
+        delay(300);
+        while(digitalRead(pusherLimswit) ! = 0)
+        {
+            PusherDown(); 
+        }
+        PusherStop();
+        delay(1100);
     }
     PusherUp(); 
     delay(4000);
     PusherStop();
+}
+
+void Pusher_task(int status) 
+{
+    if (status == 1) // stop
+    {
+        PusherStop();
+    }
+    else if (status == 2) //縮短
+    {
+        PusherDown();
+    }
+    else if (status == 3) //伸長
+    {
+        PusherUp();
+    }
 }
 
 
@@ -277,3 +242,4 @@ void loop()
     //Limswitch();
     motorMove();
 }
+
