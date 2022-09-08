@@ -1,10 +1,10 @@
-//This program will be stored in the arduino board ,and receive the msg sended from the python server
+/* This will be stored in the arduino board ,and receive the msg sended from the python server */
 
 // topStepper ,  downStepper
 const byte topStepper_CLK = 44; // step 
-const byte topStepper_CW  = 26;  // direction
+const byte topStepper_CW  = 26; // direction
 const byte downStepper_CLK = 31; // step
-const byte downStepper_CW  = 46;  // direction
+const byte downStepper_CW  = 46; // direction
 
 // Pusher
 const byte Pusher_ENA = 11;
@@ -17,12 +17,12 @@ const byte rDCmotor_IN2 = 24; //direction
 const byte lDCmotor_IN1 = 2; //speed 
 const byte lDCmotor_IN2 = 22; //direction
 
-//限位開關
+//限位開關 都接常關 (為觸發時為通路)
 const byte topfLimswit = A0; //上前
 const byte topbLimswit = A1; //上後
 const byte downfLimswit = A2; //下前
 const byte downbLimswit = A3; //下後
-const byte pusherLimswit = A4;
+const byte pusherLimswit = A4; //推桿
 
 String message;
 int topStepper_status;
@@ -51,8 +51,51 @@ void setup()
     pinMode(pusherLimswit, INPUT_PULLUP);
 }
 
-void topStepper_task(int status)  //Stepper 上
+/* Programs about the motions of top Stepper */
+
+void topfcolli() //top Stepper collides with topfLimswitch
 {
+    delay(200);
+    while(digitalRead(topfLimswit) == 0)
+    {
+        //進
+        digitalWrite(topStepper_CW, HIGH);
+        digitalWrite(topStepper_CLK, HIGH);
+        delayMicroseconds(500);
+        digitalWrite(topStepper_CLK, LOW);
+        delayMicroseconds(500);
+    }
+}
+
+void topbcolli() //top Stepper collides with topbLimswitch
+{
+    delay(200);
+    while(digitalRead(topbLimswit) == 0)
+    {
+        //出
+        digitalWrite(topStepper_CW, LOW);
+        digitalWrite(topStepper_CLK, HIGH);
+        delayMicroseconds(500);
+        digitalWrite(topStepper_CLK, LOW);
+        delayMicroseconds(500);
+    }
+}
+
+void topStepper_task(int &status)  
+{
+    //先檢查是否撞到限位開關
+    if(digitalRead(topbLimswit) == 0)
+    {
+        status = 1; //stop //確保執行完回復動作後 不會再撞一次
+        return topbcolli();
+    }
+    else if(digitalRead(topfLimswit) == 0)
+    {
+        status = 1; //stop
+        return topfcolli();
+    }
+
+    //若沒撞到 執行動作
     if (status == 1) // stop
     {
         ;
@@ -75,13 +118,54 @@ void topStepper_task(int status)  //Stepper 上
     }
 }
 
-void downStepper_task(int status) //Stepper 下
+/* Programs about the motions of down Stepper */
+
+void downfcolli() //down Stepper collides with downfLimswitch
 {
+    delay(200);
+    while(digitalRead(downfLimswit) == 0)
+    {
+        //進
+        digitalWrite(downStepper_CW, LOW);
+        digitalWrite(downStepper_CLK, HIGH);
+        delayMicroseconds(500);
+        digitalWrite(downStepper_CLK, LOW);
+        delayMicroseconds(500);
+    }
+}
+
+void downbcolli()
+{
+    delay(200);
+    while(digitalRead(downbLimswit) == 0)
+    {
+        //出
+        digitalWrite(downStepper_CW, HIGH);
+        digitalWrite(downStepper_CLK, HIGH);
+        delayMicroseconds(500);
+        digitalWrite(downStepper_CLK, LOW);
+        delayMicroseconds(500); 
+    }
+}
+void downStepper_task(int& status) 
+{
+    //先檢查是否撞到限位開關
+    if(digitalRead(downbLimswit) == 0)
+    {
+        status = 1; //stop //確保執行完回復動作後 不會再撞一次
+        return downbcolli();
+    }
+    else if(digitalRead(downfLimswit) == 0)
+    {
+        status = 1; //stop
+        return downfcolli();
+    }
+
     if (status == 1) // stop
     {
         ;
     }
-    else if (status == 2) // counterclockwise(?
+    else if (status == 2) //出
     {
         digitalWrite(downStepper_CW, HIGH);
         digitalWrite(downStepper_CLK, HIGH);
@@ -89,7 +173,7 @@ void downStepper_task(int status) //Stepper 下
         digitalWrite(downStepper_CLK, LOW);
         delayMicroseconds(500);
     }
-    else if (status == 3) // clockwise(?
+    else if (status == 3) //進
     {
 
         digitalWrite(downStepper_CW, LOW);
@@ -100,6 +184,7 @@ void downStepper_task(int status) //Stepper 下
     }
 }
 
+/* Programs about the motions of flywheel */
 #define speedIn 180
 #define speedOut 180
 void flywheel_task(int status) //flywheel
@@ -127,6 +212,7 @@ void flywheel_task(int status) //flywheel
     }
 }
 
+/* Programs about the motions of Pusher */
 void PusherUp()
 {
     digitalWrite(Pusher_IN1, LOW);
@@ -148,9 +234,9 @@ void PusherStop()
     analogWrite(Pusher_ENA, 0);
 }
 
-void takeBasket()
+void takeBasket() //取籃球
 {
-    while(digitalRead(pusherLimswit) ! = 0)
+    while(digitalRead(pusherLimswit))
     {
         PusherDown(); 
     }
@@ -163,7 +249,7 @@ void takeBasket()
         delay(3000);
         PusherStop();
         delay(300);
-        while(digitalRead(pusherLimswit) ! = 0)
+        while(digitalRead(pusherLimswit))
         {
             PusherDown(); 
         }
@@ -191,12 +277,12 @@ void Pusher_task(int status)
     }
 }
 
-
+/* Programs about processing the msg sended from the python_server */
 
 // topStepper 11, 12, 13退 
 // downStepper 21, 22, 23退
-//Pusher 31, 32, 33長
-//flywheel 41, 42, 43吸
+// Pusher 31, 32, 33伸
+// flywheel 41, 42, 43吸
 
 void action(String message)
 {
@@ -223,6 +309,7 @@ void action(String message)
     }
 }
 
+/* Programs about activating the motors */
 void motorMove()
 {
     topStepper_task(topStepper_status);
@@ -239,7 +326,5 @@ void loop()
         Serial.println(message);
         action(message);
     }
-    //Limswitch();
     motorMove();
 }
-
