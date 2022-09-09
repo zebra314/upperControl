@@ -17,12 +17,12 @@ const byte rDCmotor_IN2 = 24; //direction
 const byte lDCmotor_IN1 = 2; //speed 
 const byte lDCmotor_IN2 = 22; //direction
 
-//限位開關 都接常關 (為觸發時為通路)
-const byte topfLimswit = A0; //上前
-const byte topbLimswit = A1; //上後
-const byte downfLimswit = A2; //下前
-const byte downbLimswit = A3; //下後
-const byte pusherLimswit = A4; //推桿
+//限位開關 都接NO (觸發時為0)
+const byte topfLimswit = 8; //上前
+const byte topbLimswit = 7; //上後
+const byte downfLimswit = 6; //下前
+const byte downbLimswit = 5; //下後
+const byte pusherLimswit = 4; //推桿
 
 String message;
 int topStepper_status;
@@ -51,136 +51,92 @@ void setup()
     pinMode(pusherLimswit, INPUT_PULLUP);
 }
 
+void StepperGo(const byte CW,const byte CLK,int Dir)
+{
+    digitalWrite(CW, Dir);
+    digitalWrite(CLK, HIGH);
+    delayMicroseconds(500);
+    digitalWrite(CLK, LOW);
+    delayMicroseconds(500);
+}
+
 /* Programs about the motions of top Stepper */
-
-void topfcolli() //top Stepper collides with topfLimswitch
-{
-    delay(200);
-    while(digitalRead(topfLimswit) == 0)
-    {
-        //進
-        digitalWrite(topStepper_CW, HIGH);
-        digitalWrite(topStepper_CLK, HIGH);
-        delayMicroseconds(500);
-        digitalWrite(topStepper_CLK, LOW);
-        delayMicroseconds(500);
-    }
-}
-
-void topbcolli() //top Stepper collides with topbLimswitch
-{
-    delay(200);
-    while(digitalRead(topbLimswit) == 0)
-    {
-        //出
-        digitalWrite(topStepper_CW, LOW);
-        digitalWrite(topStepper_CLK, HIGH);
-        delayMicroseconds(500);
-        digitalWrite(topStepper_CLK, LOW);
-        delayMicroseconds(500);
-    }
-}
-
 void topStepper_task(int &status)  
 {
-    //先檢查是否撞到限位開關
-    if(digitalRead(topbLimswit) == 0)
-    {
-        status = 1; //stop //確保執行完回復動作後 不會再撞一次
-        return topbcolli();
-    }
-    else if(digitalRead(topfLimswit) == 0)
-    {
-        status = 1; //stop
-        return topfcolli();
-    }
-
-    //若沒撞到 執行動作
-    if (status == 1) // stop
-    {
-        ;
-    }
+    if (status == 1){;} //stop
     else if (status == 2) //出 
     {
-        digitalWrite(topStepper_CW, LOW);
-        digitalWrite(topStepper_CLK, HIGH);
-        delayMicroseconds(500);
-        digitalWrite(topStepper_CLK, LOW);
-        delayMicroseconds(500);
+        if(digitalRead(topfLimswit) == 0)
+        {
+            delay(150);
+            while(digitalRead(topfLimswit) == 0)
+            {
+                StepperGo(topStepper_CW,topStepper_CLK,1); //進
+            }
+            status = 1; //stop
+        }
+        else
+        {
+            StepperGo(topStepper_CW,topStepper_CLK,0); //出
+        }
     }
     else if (status == 3) //進
     {
-        digitalWrite(topStepper_CW, HIGH);
-        digitalWrite(topStepper_CLK, HIGH);
-        delayMicroseconds(500);
-        digitalWrite(topStepper_CLK, LOW);
-        delayMicroseconds(500);
+        if(digitalRead(topbLimswit) == 0)
+        {
+            delay(150);
+            while(digitalRead(topbLimswit) == 0)
+            {
+                StepperGo(topStepper_CW,topStepper_CLK,0); //出
+            }
+            status = 1; 
+        }
+        else
+        {
+            StepperGo(topStepper_CW,topStepper_CLK,1); //進
+        }
     }
 }
 
 /* Programs about the motions of down Stepper */
-
-void downfcolli() //down Stepper collides with downfLimswitch
-{
-    delay(200);
-    while(digitalRead(downfLimswit) == 0)
-    {
-        //進
-        digitalWrite(downStepper_CW, LOW);
-        digitalWrite(downStepper_CLK, HIGH);
-        delayMicroseconds(500);
-        digitalWrite(downStepper_CLK, LOW);
-        delayMicroseconds(500);
-    }
-}
-
-void downbcolli()
-{
-    delay(200);
-    while(digitalRead(downbLimswit) == 0)
-    {
-        //出
-        digitalWrite(downStepper_CW, HIGH);
-        digitalWrite(downStepper_CLK, HIGH);
-        delayMicroseconds(500);
-        digitalWrite(downStepper_CLK, LOW);
-        delayMicroseconds(500); 
-    }
-}
 void downStepper_task(int& status) 
 {
-    //先檢查是否撞到限位開關
-    if(digitalRead(downbLimswit) == 0)
-    {
-        status = 1; //stop //確保執行完回復動作後 不會再撞一次
-        return downbcolli();
-    }
-    else if(digitalRead(downfLimswit) == 0)
-    {
-        status = 1; //stop
-        return downfcolli();
-    }
-
-    if (status == 1) // stop
-    {
-        ;
-    }
+    if (status == 1){;} // stop
     else if (status == 2) //出
     {
-        digitalWrite(downStepper_CW, HIGH);
-        digitalWrite(downStepper_CLK, HIGH);
-        delayMicroseconds(500);
-        digitalWrite(downStepper_CLK, LOW);
-        delayMicroseconds(500);
+        if(digitalRead(downfLimswit) == 0)
+        {
+            delay(150);
+            while(digitalRead(downfLimswit) == 0)
+            {
+                //進
+                StepperGo(downStepper_CW,downStepper_CLK,0);
+            }
+            status = 1; //stop
+        }
+        else
+        {
+            //出
+            StepperGo(downStepper_CW,downStepper_CLK,1);
+        }
     }
     else if (status == 3) //進
     {
-
-        digitalWrite(downStepper_CW, LOW);
-        digitalWrite(downStepper_CLK, HIGH);
-        delayMicroseconds(500);
-        digitalWrite(downStepper_CLK, LOW);
-        delayMicroseconds(500);
+        if(digitalRead(downbLimswit) == 0)
+        {
+            delay(150);
+            while(digitalRead(downbLimswit) == 0)
+            {
+                //出
+                StepperGo(downStepper_CW,downStepper_CLK,1);
+            }
+            status = 1; //stop
+        }
+        else
+        {
+            //進
+            StepperGo(downStepper_CW,downStepper_CLK,0);
+        }
     }
 }
 
@@ -236,7 +192,7 @@ void PusherStop()
 
 void takeBasket() //取籃球
 {
-    while(digitalRead(pusherLimswit))
+    while(digitalRead(pusherLimswit) == 1)
     {
         PusherDown(); 
     }
@@ -249,7 +205,7 @@ void takeBasket() //取籃球
         delay(3000);
         PusherStop();
         delay(300);
-        while(digitalRead(pusherLimswit))
+        while(digitalRead(pusherLimswit) == 1)
         {
             PusherDown(); 
         }
@@ -309,7 +265,6 @@ void action(String message)
     }
 }
 
-/* Programs about activating the motors */
 void motorMove()
 {
     topStepper_task(topStepper_status);
