@@ -190,15 +190,14 @@ void PusherStop()
     analogWrite(Pusher_ENA, 0);
 }
 
-void takeBasket() //取籃球
+void takeBall() //取球
 {
     while(digitalRead(pusherLimswit) == 1)
     {
         PusherDown(); 
     }
     PusherStop();
-    delay(200);
-
+    delay(100);
     for(int i = 0 ; i<3 ; i++)
     {
         PusherUp(); //伸長
@@ -233,6 +232,19 @@ void Pusher_task(int status)
     }
 }
 
+/* Programs about the task */
+void StandardPosi()
+{
+    Pusher_status = 1;
+    topStepper_status = 3;
+}
+
+void releaseBall()
+{
+    flywheel_status = 2;
+    topStepper_status = 2;
+}
+
 /* Programs about processing the msg sended from the python_server */
 
 // topStepper 11, 12, 13退 
@@ -258,8 +270,14 @@ void action(String message)
         case '4': //飛輪
             flywheel_status = int(motor_status - '0');  
             break; 
-        case '5': //take basketballs 
-            takeBasket();
+        case '5': //standard position
+            StandardPosi();
+            break;
+        case '6': //take basketballs 
+            takeBall();
+            break;
+        case '7':
+            releaseBall();
             break;
 
     }
