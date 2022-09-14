@@ -18,9 +18,7 @@ const byte lDCmotor_IN1 = 2; //speed
 const byte lDCmotor_IN2 = 22; //direction
 
 //限位開關 都接NO (觸發時為0)
-const byte topfLimswit = 8; //上前
 const byte topbLimswit = 7; //上後
-const byte downfLimswit = 6; //下前
 const byte downbLimswit = 5; //下後
 const byte pusherLimswit = 4; //推桿
 
@@ -44,9 +42,7 @@ void setup()
     pinMode(rDCmotor_IN2, OUTPUT);
     pinMode(lDCmotor_IN1, OUTPUT);
     pinMode(lDCmotor_IN2, OUTPUT);
-    pinMode(topfLimswit, INPUT_PULLUP);
-    pinMode(topbLimswit, INPUT_PULLUP);
-    pinMode(downfLimswit, INPUT_PULLUP);
+    pinMode(topbLimswit, INPUT_PULLUP); 
     pinMode(downbLimswit, INPUT_PULLUP);
     pinMode(pusherLimswit, INPUT_PULLUP);
 }
@@ -66,19 +62,7 @@ void topStepper_task(int &status)
     if (status == 1){;} //stop
     else if (status == 2) //出 
     {
-        if(digitalRead(topfLimswit) == 0)
-        {
-            delay(150);
-            while(digitalRead(topfLimswit) == 0)
-            {
-                StepperGo(topStepper_CW,topStepper_CLK,1); //進
-            }
-            status = 1; //stop
-        }
-        else
-        {
-            StepperGo(topStepper_CW,topStepper_CLK,0); //出
-        }
+        StepperGo(topStepper_CW,topStepper_CLK,0); //出
     }
     else if (status == 3) //進
     {
@@ -104,21 +88,8 @@ void downStepper_task(int& status)
     if (status == 1){;} // stop
     else if (status == 2) //出
     {
-        if(digitalRead(downfLimswit) == 0)
-        {
-            delay(150);
-            while(digitalRead(downfLimswit) == 0)
-            {
-                //進
-                StepperGo(downStepper_CW,downStepper_CLK,0);
-            }
-            status = 1; //stop
-        }
-        else
-        {
-            //出
-            StepperGo(downStepper_CW,downStepper_CLK,1);
-        }
+        //出
+        StepperGo(downStepper_CW,downStepper_CLK,1);
     }
     else if (status == 3) //進
     {
@@ -141,8 +112,8 @@ void downStepper_task(int& status)
 }
 
 /* Programs about the motions of flywheel */
-#define speedIn 180
-#define speedOut 180
+#define speedIn 200
+#define speedOut 200
 void flywheel_task(int status) //flywheel
 {
     if (status == 1) // stop
@@ -154,32 +125,32 @@ void flywheel_task(int status) //flywheel
     }
     else if (status == 2) // 噴
     {
-        analogWrite(rDCmotor_IN1, speedOut);
-        digitalWrite(rDCmotor_IN2, LOW);
-        analogWrite(lDCmotor_IN1, speedOut);
-        digitalWrite(lDCmotor_IN2, HIGH);
-    }
-    else if (status == 3) // 吸
-    {
         analogWrite(rDCmotor_IN1, speedIn);
         digitalWrite(rDCmotor_IN2, HIGH);
         analogWrite(lDCmotor_IN1, speedIn);
         digitalWrite(lDCmotor_IN2, LOW);
+    }
+    else if (status == 3) // 吸
+    {
+        analogWrite(rDCmotor_IN1, speedOut);
+        digitalWrite(rDCmotor_IN2, LOW);
+        analogWrite(lDCmotor_IN1, speedOut);
+        digitalWrite(lDCmotor_IN2, HIGH);
     }
 }
 
 /* Programs about the motions of Pusher */
 void PusherUp()
 {
-    digitalWrite(Pusher_IN1, LOW);
-    digitalWrite(Pusher_IN2, HIGH);
+    digitalWrite(Pusher_IN1, HIGH);
+    digitalWrite(Pusher_IN2, LOW);
     analogWrite(Pusher_ENA, 100);
 }
 
 void PusherDown()
 {
-    digitalWrite(Pusher_IN1, HIGH);
-    digitalWrite(Pusher_IN2, LOW);
+    digitalWrite(Pusher_IN1, LOW);
+    digitalWrite(Pusher_IN2, HIGH);
     analogWrite(Pusher_ENA, 100);
 }
 
@@ -216,7 +187,7 @@ void takeBall() //取球
     PusherStop();
 }
 
-void Pusher_task(int status) 
+void Pusher_task(int& status) 
 {
     if (status == 1) // stop
     {
@@ -224,7 +195,19 @@ void Pusher_task(int status)
     }
     else if (status == 2) //縮短
     {
-        PusherDown();
+        if(digitalRead(pusherLimswit) == 0)
+        {
+            delay(150);
+            while(digitalRead(pusherLimswit) == 0)
+            {
+                PusherUp();
+            }
+            status = 1; //stop
+        }
+        else
+        {
+            PusherDown();
+        }
     }
     else if (status == 3) //伸長
     {
