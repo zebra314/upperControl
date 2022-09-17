@@ -20,6 +20,7 @@ const byte lDCmotor_IN2 = 22; //direction
 //限位開關 都接NO (觸發時為0)
 const byte topbLimswit = 7; //上後
 const byte downbLimswit = 5; //下後
+const byte downfLimswit = 6; //下前
 const byte pusherLimswit = 4; //推桿
 
 String message;
@@ -43,6 +44,7 @@ void setup()
     pinMode(lDCmotor_IN1, OUTPUT);
     pinMode(lDCmotor_IN2, OUTPUT);
     pinMode(topbLimswit, INPUT_PULLUP); 
+    pinMode(downfLimswit, INPUT_PULLUP);
     pinMode(downbLimswit, INPUT_PULLUP);
     pinMode(pusherLimswit, INPUT_PULLUP);
 }
@@ -51,9 +53,9 @@ void StepperGo(const byte CW,const byte CLK,int Dir)
 {
     digitalWrite(CW, Dir);
     digitalWrite(CLK, HIGH);
-    delayMicroseconds(500);
+    delayMicroseconds(450);
     digitalWrite(CLK, LOW);
-    delayMicroseconds(500);
+    delayMicroseconds(450);
 }
 
 /* Programs about the motions of top Stepper */
@@ -88,8 +90,21 @@ void downStepper_task(int& status)
     if (status == 1){;} // stop
     else if (status == 2) //出
     {
-        //出
-        StepperGo(downStepper_CW,downStepper_CLK,1);
+        if(digitalRead(downfLimswit) == 0)
+        {
+            delay(150);
+            while(digitalRead(downfLimswit) == 0)
+            {
+                //進
+                StepperGo(downStepper_CW,downStepper_CLK,0);
+            }
+            status = 1; //stop
+        }
+        else
+        {
+            //出
+            StepperGo(downStepper_CW,downStepper_CLK,1);
+        }
     }
     else if (status == 3) //進
     {
@@ -144,14 +159,14 @@ void PusherUp()
 {
     digitalWrite(Pusher_IN1, HIGH);
     digitalWrite(Pusher_IN2, LOW);
-    analogWrite(Pusher_ENA, 100);
+    analogWrite(Pusher_ENA, 50);
 }
 
 void PusherDown()
 {
     digitalWrite(Pusher_IN1, LOW);
     digitalWrite(Pusher_IN2, HIGH);
-    analogWrite(Pusher_ENA, 100);
+    analogWrite(Pusher_ENA, 50);
 }
 
 void PusherStop()
@@ -218,7 +233,7 @@ void Pusher_task(int& status)
 /* Programs about the task */
 void StandardPosi()
 {
-    Pusher_status = 1;
+    Pusher_status = 2;
     topStepper_status = 3;
 }
 
