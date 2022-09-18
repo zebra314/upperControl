@@ -76,13 +76,14 @@ void topStepper_backward(int& status)
     }
     else if (digitalRead(topbLimswit) == 0)
     {
-        delay(150);
+        delay(100);
         while(digitalRead(topbLimswit) == 0)
         {
             // forward
             StepperGo(topStepper_CW,topStepper_CLK,0); 
         }
         status = 1;
+        Serial.println("13");
     }
 }
 
@@ -110,13 +111,14 @@ void downStepper_forward(int& status)
     }
     else if (digitalRead(downfLimswit) == 0)
     {
-        delay(150);
+        delay(100);
         while(digitalRead(downfLimswit) == 0)
         {
             //backward
             StepperGo(downStepper_CW,downStepper_CLK,0);
         }
         status = 1;
+        Serial.println("22");
     }
 }
 
@@ -129,13 +131,14 @@ void downStepper_backward(int& status)
     }
     else if (digitalRead(downbLimswit) == 0)
     {
-        delay(150);
+        delay(100);
         while(digitalRead(downbLimswit) == 0)
         {
             //forward
             StepperGo(downStepper_CW,downStepper_CLK,1);
         }
         status = 1;
+        Serial.println("23");
     }
 }
 
@@ -178,7 +181,7 @@ void PusherUp()
 {
     digitalWrite(Pusher_IN1, HIGH);
     digitalWrite(Pusher_IN2, LOW);
-    analogWrite(Pusher_ENA, 100);
+    analogWrite(Pusher_ENA, 150);
 }
 
 void PusherDown(int& status)
@@ -187,16 +190,17 @@ void PusherDown(int& status)
     {
         digitalWrite(Pusher_IN1, LOW);
         digitalWrite(Pusher_IN2, HIGH);
-        analogWrite(Pusher_ENA, 100);
+        analogWrite(Pusher_ENA, 150);
     }
     else if(digitalRead(pusherLimswit) == 0)
     {
-        delay(150);
+        delay(100);
         while(digitalRead(pusherLimswit) == 0)
         {
             PusherUp();
         }
         status = 1; //stop
+        Serial.println("32");
     }
 }
 
@@ -223,14 +227,12 @@ void Pusher_task(int& status)
     }
 }
 
-
-
 /* Programs about processing the msg sended from the python_server */
 
 // topStepper 11, 12, 13退 
 // downStepper 21, 22, 23退
 // Pusher 31, 32, 33伸
-// flywheel 41, 42, 43吸
+// flywheel 41, 42, 
 
 void action(String message)
 {
@@ -267,7 +269,6 @@ void loop()
     {
         message = Serial.readString();
         action(message);
-        Serial.println(message);
     }
     motorMove();
 }
