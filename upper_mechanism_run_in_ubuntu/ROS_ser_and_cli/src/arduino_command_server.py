@@ -17,15 +17,16 @@ from upper_control.srv import action,actionResponse
 '''
 
 def callback(request):
-    actions = [1,11,12,13,21,22,23,31,32,33,41,42,43,5]
+    actions = [0,1,11,12,13,21,22,23,31,32,33,41,42,43,5,61,62,63,5,6,7]
     if(request.request in actions): 
         
         # 如果 client 的 request 滿足要求 , send it to arduino
         ser.write(bytes(str(request.request), 'utf-8'))
-        arduino_echo = ser.readline().decode('utf').strip()
+        arduino_echo = ''
+        while arduino_echo == '' :
+            arduino_echo = ser.readline().decode('utf').strip()
         print("Arduino :" , arduino_echo)
     else :
-
         print('Arduino :invalid command')
         request.request = -1
         
