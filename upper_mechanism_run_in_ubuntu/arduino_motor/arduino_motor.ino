@@ -186,7 +186,7 @@ void PusherUp()
 {
     digitalWrite(Pusher_IN1, HIGH);
     digitalWrite(Pusher_IN2, LOW);
-    analogWrite(Pusher_ENA, 100);
+    analogWrite(Pusher_ENA, 150);
 }
 
 void PusherDown(int& status)
@@ -195,7 +195,7 @@ void PusherDown(int& status)
     {
         digitalWrite(Pusher_IN1, LOW);
         digitalWrite(Pusher_IN2, HIGH);
-        analogWrite(Pusher_ENA, 100);
+        analogWrite(Pusher_ENA, 150);
     }
     else if(digitalRead(pusherLimswit) == 0)
     {
@@ -246,7 +246,7 @@ void releaseBall()
 }
 
 
-void takeBall(int time) //取球
+void takeBall(int& time) //取球
 {
   if(time == 1)
   {
@@ -274,14 +274,14 @@ void takeBall(int time) //取球
         StepperGo(topStepper_CW,topStepper_CLK,0); 
     }
     while(digitalRead(pusherLimswit) == 1)
-        {
-            PusherDown(Pusher_status); //down
-        }
-        PusherStop();
-        delay(2000);
-        PusherUp(); //up
-        delay(5000);
-        PusherStop();
+    {
+        PusherDown(Pusher_status); //down
+    }
+    PusherStop();
+    delay(1000);
+    PusherUp(); //up
+    delay(5000);
+    PusherStop();
   }
   
   else if(time == 2 or time ==3)
@@ -291,10 +291,14 @@ void takeBall(int time) //取球
       PusherDown(Pusher_status); //down
     }
         PusherStop();
-        delay(2000);
+        delay(1000);
         PusherUp(); //up
         delay(5000);
         PusherStop();
+    if(time == 3)
+    {
+      time = 0;
+    }
   }
 
 }
