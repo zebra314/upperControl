@@ -49,6 +49,7 @@ void setup()
     pinMode(pusherLimswit, INPUT_PULLUP);
 }
 
+/* Programs about the motions of Stepper */
 void StepperGo(const byte CW,const byte CLK,int Dir)
 {
     digitalWrite(CW, Dir);
@@ -59,70 +60,82 @@ void StepperGo(const byte CW,const byte CLK,int Dir)
 }
 
 /* Programs about the motions of top Stepper */
+void topStepper_forward()
+{
+    // forward
+    StepperGo(topStepper_CW,topStepper_CLK,0); 
+}
+
+void topStepper_backward()
+{
+    while(digitalRead(topbLimswit) == 1)
+    {
+        // backward
+        StepperGo(topStepper_CW,topStepper_CLK,1);
+    }
+    delay(150);
+    while(digitalRead(topbLimswit) == 0)
+    {
+        // forward
+        StepperGo(topStepper_CW,topStepper_CLK,0); 
+    }
+}
+
 void topStepper_task(int &status)  
 {
     if (status == 1){;} //stop
     else if (status == 2) //出 
     {
-        StepperGo(topStepper_CW,topStepper_CLK,0); //出
+        topStepper_forward();
     }
     else if (status == 3) //進
     {
-        if(digitalRead(topbLimswit) == 0)
-        {
-            delay(150);
-            while(digitalRead(topbLimswit) == 0)
-            {
-                StepperGo(topStepper_CW,topStepper_CLK,0); //出
-            }
-            status = 1; 
-        }
-        else
-        {
-            StepperGo(topStepper_CW,topStepper_CLK,1); //進
-        }
+        topStepper_backward();
     }
 }
 
 /* Programs about the motions of down Stepper */
+
+void downStepper_forward()
+{
+    while(digitalRead(downfLimswit) == 1)
+    {
+        //forward
+        StepperGo(downStepper_CW,downStepper_CLK,1);
+    }
+    delay(150);
+    while(digitalRead(downfLimswit) == 0)
+    {
+        //backward
+        StepperGo(downStepper_CW,downStepper_CLK,0);
+    }
+}
+
+void downStepper_backward()
+{
+    while(digitalRead(downbLimswit) == 1)
+    {
+        //backward
+        StepperGo(downStepper_CW,downStepper_CLK,0);
+    }
+    delay(150);
+    while(digitalRead(downbLimswit) == 0)
+    {
+        //forward
+        StepperGo(downStepper_CW,downStepper_CLK,1);
+    }
+}
+
 void downStepper_task(int& status) 
 {
     if (status == 1){;} // stop
-    else if (status == 2) //出
+    else if (status == 2) // forward
     {
-        if(digitalRead(downfLimswit) == 0)
-        {
-            delay(150);
-            while(digitalRead(downfLimswit) == 0)
-            {
-                //進
-                StepperGo(downStepper_CW,downStepper_CLK,0);
-            }
-            status = 1; //stop
-        }
-        else
-        {
-            //出
-            StepperGo(downStepper_CW,downStepper_CLK,1);
-        }
+        downStepper_forward();
     }
-    else if (status == 3) //進
+    else if (status == 3) // backward
     {
-        if(digitalRead(downbLimswit) == 0)
-        {
-            delay(150);
-            while(digitalRead(downbLimswit) == 0)
-            {
-                //出
-                StepperGo(downStepper_CW,downStepper_CLK,1);
-            }
-            status = 1; //stop
-        }
-        else
-        {
-            //進
-            StepperGo(downStepper_CW,downStepper_CLK,0);
-        }
+        downStepper_backward();
     }
 }
 
@@ -133,23 +146,23 @@ void flywheel_task(int status) //flywheel
 {
     if (status == 1) // stop
     {
-        analogWrite(rDCmotor_IN1, 0);
+        digitalWrite(rDCmotor_IN1, 0);
         digitalWrite(rDCmotor_IN2, LOW);
-        analogWrite(lDCmotor_IN1, 0);
+        digitalWrite(lDCmotor_IN1, 0);
         digitalWrite(lDCmotor_IN2, LOW);
     }
     else if (status == 2) // 噴
     {
-        analogWrite(rDCmotor_IN1, speedIn);
+        digitalWrite(rDCmotor_IN1, speedIn);
         digitalWrite(rDCmotor_IN2, HIGH);
-        analogWrite(lDCmotor_IN1, speedIn);
+        digitalWrite(lDCmotor_IN1, speedIn);
         digitalWrite(lDCmotor_IN2, LOW);
     }
     else if (status == 3) // 吸
     {
-        analogWrite(rDCmotor_IN1, speedOut);
+        digitalWrite(rDCmotor_IN1, speedOut);
         digitalWrite(rDCmotor_IN2, LOW);
-        analogWrite(lDCmotor_IN1, speedOut);
+        digitalWrite(lDCmotor_IN1, speedOut);
         digitalWrite(lDCmotor_IN2, HIGH);
     }
 }
@@ -174,32 +187,6 @@ void PusherStop()
     digitalWrite(Pusher_IN1, LOW);
     digitalWrite(Pusher_IN2, LOW);
     analogWrite(Pusher_ENA, 0);
-}
-
-void takeBall() //取球
-{
-    while(digitalRead(pusherLimswit) == 1)
-    {
-        PusherDown(); 
-    }
-    PusherStop();
-    delay(100);
-    for(int i = 0 ; i<3 ; i++)
-    {
-        PusherUp(); //伸長
-        delay(3000);
-        PusherStop();
-        delay(300);
-        while(digitalRead(pusherLimswit) == 1)
-        {
-            PusherDown(); 
-        }
-        PusherStop();
-        delay(1100);
-    }
-    PusherUp(); 
-    delay(4000);
-    PusherStop();
 }
 
 void Pusher_task(int& status) 
@@ -243,6 +230,26 @@ void releaseBall()
     topStepper_status = 2;
 }
 
+void takeBall() //取球
+{
+
+    downStepper_status = 3;
+    topStepper_status = 3;
+
+    for(int i = 0 ; i<3 ; i++)
+    {
+        Pusher_status = 3; //up
+        delay(4000);
+        Pusher_status = 1; //stop
+        delay(150);
+        Pusher_status = 2; //down
+        delay(4150);
+    }
+    Pusher_status = 3; //up
+    delay(4000);
+    Pusher_status = 1; //stop
+}
+
 /* Programs about processing the msg sended from the python_server */
 
 // topStepper 11, 12, 13退 
@@ -256,6 +263,9 @@ void action(String message)
     char motor_status = message[1];
     switch (motor_type)
     {
+        case '1':
+            takeBall();
+        /*
         case '1': //上
             topStepper_status = int(motor_status - '0');
             break;
@@ -277,7 +287,7 @@ void action(String message)
         case '7':
             releaseBall();
             break;
-
+        */
     }
 }
 
