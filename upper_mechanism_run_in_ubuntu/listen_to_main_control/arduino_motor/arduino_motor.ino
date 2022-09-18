@@ -28,8 +28,6 @@ int topStepper_status;
 int downStepper_status;
 int Pusher_status;
 int flywheel_status;
-int takeBall_status;
-int times = 0;
 
 void setup()
 {
@@ -52,6 +50,7 @@ void setup()
 }
 
 /* Programs about the motions of Stepper */
+
 void StepperGo(const byte CW,const byte CLK,int Dir)
 {
     digitalWrite(CW, Dir);
@@ -154,8 +153,7 @@ void downStepper_task(int& status)
 }
 
 /* Programs about the motions of flywheel */
-#define speedIn 200
-#define speedOut 200
+
 void flywheel_task(int status) //flywheel
 {
     if (status == 1) // stop
@@ -165,23 +163,17 @@ void flywheel_task(int status) //flywheel
         digitalWrite(lDCmotor_IN1, 0);
         digitalWrite(lDCmotor_IN2, LOW);
     }
-    else if (status == 2) // 噴
+    else if (status == 2) // 射
     {
-        digitalWrite(rDCmotor_IN1, speedIn);
-        digitalWrite(rDCmotor_IN2, HIGH);
-        digitalWrite(lDCmotor_IN1, speedIn);
-        digitalWrite(lDCmotor_IN2, LOW);
-    }
-    else if (status == 3) // 吸
-    {
-        digitalWrite(rDCmotor_IN1, speedOut);
+        digitalWrite(rDCmotor_IN1, 1);
         digitalWrite(rDCmotor_IN2, LOW);
-        digitalWrite(lDCmotor_IN1, speedOut);
+        digitalWrite(lDCmotor_IN1, 1);
         digitalWrite(lDCmotor_IN2, HIGH);
     }
 }
 
 /* Programs about the motions of Pusher */
+
 void PusherUp()
 {
     digitalWrite(Pusher_IN1, HIGH);
@@ -231,73 +223,7 @@ void Pusher_task(int& status)
     }
 }
 
-/* Programs about the task */
-void StandardPosi()
-{
-    Pusher_status = 2;
-    topStepper_status = 3;
-    downStepper_status = 2;
-}
 
-void releaseBall()
-{
-    flywheel_status = 2;
-    topStepper_status = 2;
-}
-
-
-void takeBall(int time) //取球
-{
-  if(time == 1)
-  {
-    PusherUp(); //up
-    delay(5000);
-    PusherStop(); //stop
-    while(digitalRead(downbLimswit) == 1)
-    {
-        //backward
-        StepperGo(downStepper_CW,downStepper_CLK,0);
-    }
-    while(digitalRead(downbLimswit) == 0)
-    {
-        //forward
-        StepperGo(downStepper_CW,downStepper_CLK,1);
-    }
-    while (digitalRead(topbLimswit) == 1)
-    {
-        // backward
-        StepperGo(topStepper_CW,topStepper_CLK,1);
-    }
-    while(digitalRead(topbLimswit) == 0)
-    {
-        // forward
-        StepperGo(topStepper_CW,topStepper_CLK,0); 
-    }
-    while(digitalRead(pusherLimswit) == 1)
-        {
-            PusherDown(Pusher_status); //down
-        }
-        PusherStop();
-        delay(2000);
-        PusherUp(); //up
-        delay(5000);
-        PusherStop();
-  }
-  
-  else if(time == 2 or time ==3)
-  {
-    while(digitalRead(pusherLimswit) == 1)
-    {
-      PusherDown(Pusher_status); //down
-    }
-        PusherStop();
-        delay(2000);
-        PusherUp(); //up
-        delay(5000);
-        PusherStop();
-  }
-
-}
 
 /* Programs about processing the msg sended from the python_server */
 
@@ -312,7 +238,7 @@ void action(String message)
     char motor_status = message[1];
     switch (motor_type)
     {
-        /*case '1': //上
+        case '1': //上
             topStepper_status = int(motor_status - '0');
             break;
         case '2': //下
@@ -324,20 +250,6 @@ void action(String message)
         case '4': //飛輪
             flywheel_status = int(motor_status - '0');  
             break; 
-        case '5': //standard position
-            StandardPosi();
-            break;*/
-        case '1': //take basketballs 
-            times++;
-            takeBall(times);
-            break;
-        case '0': 
-            StandardPosi();
-            break;
-        /*
-        case '7':
-            releaseBall();
-            break;*/
     }
 }
 
