@@ -6,6 +6,7 @@ from std_msgs.msg import Int8
 import serial 
 from time import sleep
 from upper_control.srv import action,actionResponse 
+import threading 
 
 '''
     The representations of actions:
@@ -15,6 +16,7 @@ from upper_control.srv import action,actionResponse
     3 , taking bowling
     4 , relasing bowling
 '''
+
 take_basketball_times = 0
 take_bowling = 0
 
@@ -39,12 +41,10 @@ def taking_basketball():
         ser.write(bytes('31', 'utf-8'))
 
         # downStepper backward 
-        tasklist = [23]
-        Go_position(tasklist)
+        Go_position([23])
 
         # Pusher down
-        tasklist = [32]
-        Go_position(tasklist)
+        Go_position([32])
         sleep(1)
 
         # Pusher up
@@ -54,8 +54,7 @@ def taking_basketball():
 
     elif(take_basketball_times == 2):
         # Pusher down
-        tasklist = [32]
-        Go_position(tasklist)
+        Go_position([32])
         sleep(1)
 
         #Pusher up
@@ -67,8 +66,7 @@ def taking_basketball():
         take_basketball_times = 0
 
         # Pusher down
-        tasklist = [32]
-        Go_position(tasklist)
+        Go_position([32])
         sleep(1)
 
         #Pusher up

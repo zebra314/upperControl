@@ -316,21 +316,18 @@ void action(String message)
     char motor_status = message[1];
     switch (motor_type)
     {
-        /*case '1': //上
+        case '2': //上
             topStepper_status = int(motor_status - '0');
             break;
-        case '2': //下
+        case '3': //下
             downStepper_status = int(motor_status - '0');
             break;
-        case '3': //推桿
+        case '4': //推桿
             Pusher_status = int(motor_status - '0');
             break;
-        case '4': //飛輪
+        case '5': //飛輪
             flywheel_status = int(motor_status - '0');  
             break; 
-        case '5': //standard position
-            StandardPosi();
-            break;*/
         case '1': //take basketballs 
             times++;
             takeBall(times);
@@ -338,10 +335,6 @@ void action(String message)
         case '0': 
             StandardPosi();
             break;
-        /*
-        case '7':
-            releaseBall();
-            break;*/
     }
 }
 
