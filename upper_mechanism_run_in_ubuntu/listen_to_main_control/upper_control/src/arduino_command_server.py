@@ -8,39 +8,11 @@ from time import sleep
 from upper_control.srv import action,actionResponse 
 import threading 
 
+
 '''
     The representations of actions:
     0 , standard position
-        topStepper backward
-        downStepper forward
-        pusher down.start()
-        pusher down.join()
-
     1 , taking basketball
-        - first 
-            pusher up
-            sleep(3)
-            downStepper backward.start()
-            sleep(?)取決於取求仰角
-            pusher stop
-            downStepper backward.join()
-            pusher down.start()
-            pusher down.join()
-
-        - second 
-            pusher up
-            sleep(3+?)
-            pusher stop
-            pusher down.start()
-            pusher down.join()
-
-        - third 
-            pusher up
-            sleep(3+?)
-            pusher stop
-            pusher down.start()
-            pusher down.join()
-
     2 , throwing basketball
 
         pusher up
@@ -65,8 +37,55 @@ import threading
     3 , taking bowling
     4 , relasing bowling
 '''
+
+# topStepper 11, 12, 13退 
+# downStepper 21, 22, 23退
+# Pusher 31, 32, 33伸
+# flywheel 41, 42
+
 take_basketball_times = 0
-take_bowling = 0
+
+def pusherDown():
+    ser.write(bytes('32', 'utf-8'))
+    arduino_echo = ''
+    while arduino_echo != '32' :
+        arduino_echo = ser.readline().decode('utf').strip()
+        
+pusherDown = threading.Thread(target = pusherDown) # creat pusher_down thread
+
+def standard_position():
+    ser.write(bytes('13', 'utf-8')) # topStepper backward
+    ser.write(bytes('22', 'utf-8')) # downStepper forward
+    pusherDown.start()
+    pusherDown.join()
+    
+def taking_basketball():
+    global take_basketball_times 
+    if(take_basketball_times == 1):
+        # pusher up
+        # sleep(3)
+        # downStepper backward.start()
+        # sleep(?)取決於取求仰角
+        # pusher stop
+        # downStepper backward.join()
+        # pusher down.start()
+        # pusher down.join()
+    elif(take_basketball_times == 2):
+        # pusher up
+        # sleep(3+?)
+        # pusher stop
+        # pusher down.start()
+        # pusher down.join()
+    elif(take_basketball_times == 3):
+        take_basketball_times =  0
+        # pusher up
+        # sleep(3+?)
+        # pusher stop
+        # pusher down.start()
+        # pusher down.join()
+
+
+
 
 
 # def throwing_basketball():
@@ -74,13 +93,14 @@ take_bowling = 0
 # def relasing_bowling():
 
 def callback(request):
-    actions = [0,1,2,3,4]
-    if(request.request in actions): 
-        # if(request.request == 0):
-        # elif(request.request == 1):
-        # else if(request.request == 2):
-        # else if(request.request == 3):
-        # else if(request.request == 4):
+    if(request.request == 0):
+        standard_position()
+    elif(request.request == 1):
+        take_basketball_times = take_basketball_times + 1
+        taking_basketball()
+    # elif(request.request == 2):
+    # elif(request.request == 3):
+    # elif(request.request == 4):
         # if the request sended from client is qualified , send it to arduino
         # ser.write(bytes(str(request.request), 'utf-8'))
 
@@ -88,10 +108,7 @@ def callback(request):
         # arduino_echo = ''
         # while arduino_echo == '' :
         #     arduino_echo = ser.readline().decode('utf').strip()
-        
-    else :
-        print('Arduino :invalid command')
-        request.request = -1
+
         
     # 回傳response 給 client
     return actionResponse(request.request) 
@@ -103,15 +120,14 @@ if __name__ == '__main__':
     
     # connect to arduino board
     global ser
-    ser = serial.Serial('/dev/ttyUSB0',57600)
+    ser = serial.Serial('/dev/arduino_control',57600)
     ser.timeout = 3
     sleep(3)
 
     try:
         while True:
-
             # if client send a request ,call callback
-            rospy.Service("action",action,callback) 
+            rospy.Service("upper_mechanism",action,callback) # action名稱太爛要改
             rospy.spin()
 
     except rospy.ROSInterruptException:
