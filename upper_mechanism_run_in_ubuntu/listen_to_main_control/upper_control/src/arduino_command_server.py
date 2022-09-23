@@ -45,70 +45,71 @@ import threading
 
 
 # Programs about sending the msg to arduino and waiting the echo 
-def topStepper_backward():
+
+def topStepperBackward():
     ser.write(bytes('13', 'utf-8'))
     arduino_echo = ''
-    while arduino_echo != '13' :
+    while arduino_echo != '13' : # waiting the message from arduino
         arduino_echo = ser.readline().decode('utf').strip()
-topStepper_backward = threading.Thread(target = topStepper_backward) # creat thread
+topStepper_backward = threading.Thread(target = topStepperBackward) # creat thread
 
-def downStepper_forward():
+def downStepperForward():
     ser.write(bytes('22', 'utf-8'))
     arduino_echo = ''
-    while arduino_echo != '22' :
+    while arduino_echo != '22' : # waiting the message from arduino
         arduino_echo = ser.readline().decode('utf').strip()
-downStepper_forward = threading.Thread(target = downStepper_forward) # creat thread 
+downStepper_forward = threading.Thread(target = downStepperForward) # creat thread 
 
-def downStepper_backward():
+def downStepperBackward():
     ser.write(bytes('23', 'utf-8'))
     arduino_echo = ''
-    while arduino_echo != '23' :
+    while arduino_echo != '23' : # waiting the message from arduino
         arduino_echo = ser.readline().decode('utf').strip()
-downStepper_backward = threading.Thread(target = downStepper_backward) # creat thread    
+downStepper_backward = threading.Thread(target = downStepperBackward) # creat thread    
 
-def pusher_down():
+def pusherDown():
     ser.write(bytes('32', 'utf-8'))
     arduino_echo = ''
-    while arduino_echo != '32' :
+    while arduino_echo != '32' : # waiting the message from arduino
         arduino_echo = ser.readline().decode('utf').strip()
-pusher_down = threading.Thread(target = pusher_down) # creat thread
+pusher_down = threading.Thread(target = pusherDown) # creat thread
 
 # Program about the motion package
 def standard_position():
-    ser.write(bytes('13', 'utf-8')) # topStepper backward
-    ser.write(bytes('22', 'utf-8')) # downStepper forward
-    pusher_down.start()
+    topStepper_backward.start() # topStepper backward
+    downStepper_forward.start() # downStepper forward
+    pusher_down.start() # pusher down
+    topStepper_backward.join()
+    downStepper_forward.join()
     pusher_down.join()
     
 take_basketball_times = 0
 def taking_basketball():
     global take_basketball_times 
+
+    # take the first basketball
     if(take_basketball_times == 1):
-        # pusher up
-        # sleep(3)
-        # downStepper backward.start()
-        # sleep(?)取決於取求仰角
-        # pusher stop
-        # downStepper backward.join()
-        # pusher down.start()
-        # pusher down.join()
-    elif(take_basketball_times == 2):
-        # pusher up
-        # sleep(3+?)
-        # pusher stop
-        # pusher down.start()
-        # pusher down.join()
-    elif(take_basketball_times == 3):
-        take_basketball_times =  0
-        # pusher up
-        # sleep(3+?)
-        # pusher stop
-        # pusher down.start()
-        # pusher down.join()
+        ser.write(bytes('33', 'utf-8')) # pusher up
+        sleep(3)
+        downStepper_backward.start() # downStepper backward
+        sleep(2)
+        ser.write(bytes('31', 'utf-8')) # pusher stop
+        downStepper_backward.join()
+        pusher_down.start()
+        pusher_down.join()
+        ser.write(bytes('33', 'utf-8')) # pusher up
+        sleep(5)
+        ser.write(bytes('31', 'utf-8')) # pusher stop
 
-
-
-
+    # take the second and the third basketball
+    elif(take_basketball_times == 2 or take_basketball_times == 3):
+        pusher_down.start()
+        pusher_down.join()
+        ser.write(bytes('33', 'utf-8')) # pusher up
+        sleep(5)
+        ser.write(bytes('31', 'utf-8')) # pusher stop
+        if(take_basketball_times == 3):
+            take_basketball_times = 0
 
 # def throwing_basketball():
 # def taking_bowling():
@@ -125,20 +126,29 @@ def callback(request):
         # elif(request.request == 2):
         # elif(request.request == 3):
         # elif(request.request == 4):
-            # if the request sended from client is qualified , send it to arduino
-            # ser.write(bytes(str(request.request), 'utf-8'))
-
-            # waiting the message from arduino
-            # arduino_echo = ''
-            # while arduino_echo == '' :
-            #     arduino_echo = ser.readline().decode('utf').strip()
+        elif(request.request == 11):
+            ser.write(bytes('11', 'utf-8'))
+        elif(request.request == 12):
+            ser.write(bytes('12', 'utf-8'))
+        elif(request.request == 13):
+            ser.write(bytes('13', 'utf-8'))
+        elif(request.request == 21):
+            ser.write(bytes('21', 'utf-8'))
+        elif(request.request == 22):
+            ser.write(bytes('22', 'utf-8'))
+        elif(request.request == 23):
+            ser.write(bytes('23', 'utf-8'))
+        elif(request.request == 31):
+            ser.write(bytes('31', 'utf-8'))
+        elif(request.request == 32):
+            ser.write(bytes('32', 'utf-8'))
+        elif(request.request == 33):
+            ser.write(bytes('33', 'utf-8'))
+        
             # 回傳response 給 client
         return actionResponse(request.request) 
     else :
         print('invalid command')
-
-        
-
 
 if __name__ == '__main__':
 
