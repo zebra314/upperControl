@@ -305,34 +305,17 @@ void takeBall(int& time) //取球
 
 /* Programs about processing the msg sended from the python_server */
 
-// topStepper 21, 22, 23退 
-// downStepper 31, 32, 33退
-// Pusher 41, 42, 43伸
-// flywheel 51, 52, 53吸
-
 void action(String message)
 {
     char motor_type = message[0];
     char motor_status = message[1];
     switch (motor_type)
     {
-        case '2': //上
-            topStepper_status = int(motor_status - '0');
-            break;
-        case '3': //下
-            downStepper_status = int(motor_status - '0');
-            break;
-        case '4': //推桿
-            Pusher_status = int(motor_status - '0');
-            break;
-        case '5': //飛輪
-            flywheel_status = int(motor_status - '0');  
-            break; 
         case '1': //take basketballs 
             times++;
             takeBall(times);
             break;
-        case '0': //standard position
+        case '0': 
             StandardPosi();
             break;
     }

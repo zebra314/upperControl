@@ -12,7 +12,7 @@ def client(msg):
 
 if __name__ == '__main__':
     rospy.init_node('upper_mechanism_client_test')
-    rospy.wait_for_service("action")
+    rospy.wait_for_service("upper_mechanism")
     rate = rospy.Rate(1000) # 1000Hz
     while not rospy.is_shutdown():
         try:

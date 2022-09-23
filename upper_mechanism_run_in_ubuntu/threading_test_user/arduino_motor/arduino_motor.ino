@@ -166,7 +166,7 @@ void flywheel_task(int status) //flywheel
         digitalWrite(lDCmotor_IN1, 0);
         digitalWrite(lDCmotor_IN2, LOW);
     }
-    else if (status == 2) // 射
+    else if (status == 2) // shoot
     {
         digitalWrite(rDCmotor_IN1, 1);
         digitalWrite(rDCmotor_IN2, LOW);

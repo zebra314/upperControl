@@ -17,7 +17,7 @@ from upper_control.srv import action,actionResponse
 '''
 
 def callback(request):
-    actions = [0,1,21,22,23,31,32,33,41,42,43,51,52,53]
+    actions = [0,1]
     if(request.request in actions): 
         
         # 如果 client 的 request 滿足要求 , send it to arduino
@@ -39,7 +39,7 @@ if __name__ == '__main__':
     rospy.init_node('upper_mechanism')
     
     # connect to arduino board
-    ser = serial.Serial('/dev/ttyUSB0',57600)
+    ser = serial.Serial('/dev/arduino_control',57600)
     ser.timeout = 3
     sleep(3)
 
@@ -51,7 +51,7 @@ if __name__ == '__main__':
         while True:
 
             # client 丟了一個 request 進來 , 呼叫callback
-            rospy.Service('upper_mechanism',action,callback) 
+            rospy.Service("upper_mechanism",action,callback) 
             rospy.spin()
 
     except rospy.ROSInterruptException:

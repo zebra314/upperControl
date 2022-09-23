@@ -156,7 +156,7 @@ if __name__ == '__main__':
     
     # connect to arduino board
     global ser
-    ser = serial.Serial('/dev/arduino_control',57600)
+    ser = serial.Serial('/dev/ttyUSB0',57600)
     ser.timeout = 3
     sleep(3)
 
