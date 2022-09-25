@@ -36,45 +36,45 @@ import threading
 # Pusher 31, 32, 33伸
 # flywheel 41, 42
 
-
-# 有限位開關的地方
-# 1. 上步進後方
-# 2. 下步進前方
-# 3. 下步進後方
-# 4. 推桿下方
-
-
-# Programs about sending the msg to arduino and waiting the echo 
-
+# Programs about sending the msg to arduino and waiting the echo by using threading
 def topStepperBackward():
     ser.write(bytes('13', 'utf-8'))
+    print('done sending')
     arduino_echo = ''
     while arduino_echo != '13' : # waiting the message from arduino
+        print('waiting echo')
         arduino_echo = ser.readline().decode('utf').strip()
 topStepper_backward = threading.Thread(target = topStepperBackward) # creat thread
 
 def downStepperForward():
     ser.write(bytes('22', 'utf-8'))
+    print('done sending')
     arduino_echo = ''
     while arduino_echo != '22' : # waiting the message from arduino
+        print('waiting echo')
         arduino_echo = ser.readline().decode('utf').strip()
 downStepper_forward = threading.Thread(target = downStepperForward) # creat thread 
 
 def downStepperBackward():
     ser.write(bytes('23', 'utf-8'))
+    print('done sending')
     arduino_echo = ''
     while arduino_echo != '23' : # waiting the message from arduino
+        print('waiting echo')
         arduino_echo = ser.readline().decode('utf').strip()
 downStepper_backward = threading.Thread(target = downStepperBackward) # creat thread    
 
 def pusherDown():
     ser.write(bytes('32', 'utf-8'))
+    print('done sending')
     arduino_echo = ''
     while arduino_echo != '32' : # waiting the message from arduino
+        print('waiting echo')
         arduino_echo = ser.readline().decode('utf').strip()
 pusher_down = threading.Thread(target = pusherDown) # creat thread
 
 # Program about the motion package
+
 def standard_position():
     topStepper_backward.start() # topStepper backward
     downStepper_forward.start() # downStepper forward
@@ -119,33 +119,47 @@ def callback(request):
     actions = [0, 1, 2, 3, 4, 11, 12, 13, 21, 22, 23, 31, 32, 33, 41, 42]
     if(request.request in actions): 
         if(request.request == 0):
+            print('sending 0')
             standard_position()
         elif(request.request == 1):
             take_basketball_times = take_basketball_times + 1
+            print('sending 1')
             taking_basketball()
         # elif(request.request == 2):
         # elif(request.request == 3):
         # elif(request.request == 4):
+
+        # topStepper
         elif(request.request == 11):
             ser.write(bytes('11', 'utf-8'))
         elif(request.request == 12):
             ser.write(bytes('12', 'utf-8'))
         elif(request.request == 13):
             ser.write(bytes('13', 'utf-8'))
+        
+        # downStepper
         elif(request.request == 21):
             ser.write(bytes('21', 'utf-8'))
         elif(request.request == 22):
             ser.write(bytes('22', 'utf-8'))
         elif(request.request == 23):
             ser.write(bytes('23', 'utf-8'))
+        
+        # pusher
         elif(request.request == 31):
             ser.write(bytes('31', 'utf-8'))
         elif(request.request == 32):
             ser.write(bytes('32', 'utf-8'))
         elif(request.request == 33):
             ser.write(bytes('33', 'utf-8'))
-        
-            # 回傳response 給 client
+
+        # flywheel
+        elif(request.request == 41):
+            ser.write(bytes('41', 'utf-8'))
+        elif(request.request == 42):
+            ser.write(bytes('42', 'utf-8'))
+
+            # send the response to client
         return actionResponse(request.request) 
     else :
         print('invalid command')
@@ -155,15 +169,14 @@ if __name__ == '__main__':
     rospy.init_node('upper_mechanism')
     
     # connect to arduino board
-    global ser
     ser = serial.Serial('/dev/ttyUSB0',57600)
     ser.timeout = 3
     sleep(3)
 
     try:
         while True:
-            # if client send a request ,call callback
-            rospy.Service("upper_mechanism",action,callback) # action名稱太爛要改
+            # if client send a request ,call callback()
+            rospy.Service("upper_mechanism",action,callback) 
             rospy.spin()
 
     except rospy.ROSInterruptException:

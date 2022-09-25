@@ -1,21 +1,24 @@
 /* This will be stored in the arduino board ,and receive the msg sended from the python server */
 
-// topStepper ,  downStepper
-const byte topStepper_CLK = 44; // step 
-const byte topStepper_CW  = 26; // direction
-const byte downStepper_CLK = 31; // step
-const byte downStepper_CW  = 46; // direction
+// topStepper 
+const byte topStepper_CLK = 38; // step 
+const byte topStepper_CW  = 36; // direction
+
+//downDC
+const byte downDC_IN2 = 44; 
+const byte downDC_IN1 = 42; 
+const byte downDC_ENA = 8;
 
 // Pusher
-const byte Pusher_ENA = 11;
-const byte Pusher_IN1 = 9;
-const byte Pusher_IN2 = 12;
+const byte Pusher_ENA = 9;
+const byte Pusher_IN1 = 50;
+const byte Pusher_IN2 = 48;
  
 // rDCmotor 右馬達,  lDCmotor 左馬達 => flywheel
-const byte rDCmotor_IN1 = 3; //speed 
-const byte rDCmotor_IN2 = 24; //direction
-const byte lDCmotor_IN1 = 2; //speed 
-const byte lDCmotor_IN2 = 22; //direction
+const byte rDCmotor_IN1 = 32; //speed 
+const byte rDCmotor_IN2 = 30; //direction
+const byte lDCmotor_IN1 = 24; //speed 
+const byte lDCmotor_IN2 = 26; //direction
 
 //限位開關 都接NO (觸發時為0)
 const byte topbLimswit = 7; //上後
@@ -23,9 +26,10 @@ const byte downbLimswit = 5; //下後
 const byte downfLimswit = 6; //下前
 const byte pusherLimswit = 4; //推桿
 
+
 String message;
 int topStepper_status;
-int downStepper_status;
+int downDC_status;
 int Pusher_status;
 int flywheel_status;
 
@@ -34,8 +38,9 @@ void setup()
     Serial.begin(57600);
     pinMode(topStepper_CLK, OUTPUT);
     pinMode(topStepper_CW,  OUTPUT);
-    pinMode(downStepper_CLK, OUTPUT);
-    pinMode(downStepper_CW,  OUTPUT);
+    pinMode(downDC_IN1, OUTPUT);
+    pinMode(downDC_IN2, OUTPUT);
+    pinMode(downDC_ENA, OUTPUT);
     pinMode(Pusher_ENA, OUTPUT);
     pinMode(Pusher_IN1, OUTPUT);
     pinMode(Pusher_IN2, OUTPUT);
@@ -102,12 +107,14 @@ void topStepper_task(int &status)
 
 /* Programs about the motions of down Stepper */
 
-void downStepper_forward(int& status)
+void downDC_forward(int& status)
 {
     if(digitalRead(downfLimswit) == 1)
     {
         //forward
-        StepperGo(downStepper_CW,downStepper_CLK,1);
+        digitalWrite(downDC_IN1, HIGH);
+        digitalWrite(downDC_IN2, LOW);
+        analogWrite(downDC_ENA, 150);
     }
     else if (digitalRead(downfLimswit) == 0)
     {
@@ -115,19 +122,23 @@ void downStepper_forward(int& status)
         while(digitalRead(downfLimswit) == 0)
         {
             //backward
-            StepperGo(downStepper_CW,downStepper_CLK,0);
+            digitalWrite(downDC_IN1, LOW);
+            digitalWrite(downDC_IN2, HIGH);
+            analogWrite(downDC_ENA, 150);
         }
         status = 1;
         Serial.println("22");
     }
 }
 
-void downStepper_backward(int& status)
+void downDC_backward(int& status)
 {
     if(digitalRead(downbLimswit) == 1)
     {
         //backward
-        StepperGo(downStepper_CW,downStepper_CLK,0);
+        digitalWrite(downDC_IN1, LOW);
+        digitalWrite(downDC_IN2, HIGH);
+        analogWrite(downDC_ENA, 150);
     }
     else if (digitalRead(downbLimswit) == 0)
     {
@@ -135,23 +146,31 @@ void downStepper_backward(int& status)
         while(digitalRead(downbLimswit) == 0)
         {
             //forward
-            StepperGo(downStepper_CW,downStepper_CLK,1);
+            digitalWrite(downDC_IN1, HIGH);
+            digitalWrite(downDC_IN2, LOW);
+            analogWrite(downDC_ENA, 150);
         }
         status = 1;
         Serial.println("23");
     }
 }
 
-void downStepper_task(int& status) 
+void downDC_task(int& status) 
 {
-    if (status == 1){;} // stop
+    if (status == 1)
+    {
+        //stop
+        digitalWrite(downDC_IN1, LOW);
+        digitalWrite(downDC_IN2, LOW);
+        analogWrite(downDC_ENA, 0);
+    } 
     else if (status == 2) // forward
     {
-        downStepper_forward(status);
+        downDC_forward(status);
     }
     else if (status == 3) // backward
     {
-        downStepper_backward(status);
+        downDC_backward(status);
     }
 }
 
@@ -230,7 +249,7 @@ void Pusher_task(int& status)
 /* Programs about processing the msg sended from the python_server */
 
 // topStepper 11, 12, 13退 
-// downStepper 21, 22, 23退
+// downDC 21, 22, 23退
 // Pusher 31, 32, 33伸
 // flywheel 41, 42, 
 
@@ -244,7 +263,7 @@ void action(String message)
             topStepper_status = int(motor_status - '0');
             break;
         case '2': //下
-            downStepper_status = int(motor_status - '0');
+            downDC_status = int(motor_status - '0');
             break;
         case '3': //推桿
             Pusher_status = int(motor_status - '0');
@@ -258,7 +277,7 @@ void action(String message)
 void motorMove()
 {
     topStepper_task(topStepper_status);
-    downStepper_task(downStepper_status);
+    downDC_task(downDC_status);
     Pusher_task(Pusher_status);
     flywheel_task(flywheel_status); 
 }
