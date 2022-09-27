@@ -20,7 +20,7 @@ def callback(request):
     actions = [0,1,21,22,23,31,32,33,41,42,43,51,52,53]
     if(request.request in actions): 
         
-        # 如果 client 的 request 滿足要求 , send it to arduino
+        # if the request is qualified , send it to arduino
         ser.write(bytes(str(request.request), 'utf-8'))
         arduino_echo = ''
         while arduino_echo == '' :
@@ -30,7 +30,7 @@ def callback(request):
         print('Arduino :invalid command')
         request.request = -1
         
-    # 回傳response 給 client
+    # return the response to client
     return actionResponse(request.request) 
 
 
@@ -43,18 +43,13 @@ if __name__ == '__main__':
     ser.timeout = 3
     sleep(3)
 
-    # if arduino is ready , we will received "Ready"
-    arduino_echo = "Arduino :" + ser.readline().decode('utf').strip()
-    print(arduino_echo) 
-    
-    try:
-        while True:
-
-            # client 丟了一個 request 進來 , 呼叫callback
+    while True:
+        try:
+            # if the client send a request , call callback
             rospy.Service('upper_mechanism',action,callback) 
             rospy.spin()
-
-    except rospy.ROSInterruptException:
-        ser.close()
-        print('\nend')
-        exit()
+            
+        except rospy.ROSInterruptException:
+            ser.close()
+            print('\nend')
+            exit()
