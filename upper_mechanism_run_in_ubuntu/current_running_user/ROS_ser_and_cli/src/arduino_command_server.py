@@ -1,20 +1,28 @@
 #!/usr/bin/env python
 # this program get the msg sended from client ,which we manually input ,and then send it to arduino
 
+#####################
+### command guide ###
+#####################
+
+# topStepper  21 stop, 22 forward, 23 backward
+# downStepper 31 stop, 32 forward, 33 backward
+# Pusher      41 stop, 42 forward, 43 backward
+# flywheel    51 stop, 52 shoot
+
+# 0 , standard position
+# 1 , taking basketball
+# 2 , throwing basketball
+# 3 , taking bowling
+# 4 , relasing bowling
+
 import rospy
 from std_msgs.msg import Int8
 import serial 
 from time import sleep
 from upper_control.srv import action,actionResponse 
 
-'''
-    The representations of actions:
-    0 , standard position
-    1 , taking basketball
-    2 , throwing basketball
-    3 , taking bowling
-    4 , relasing bowling
-'''
+
 
 def callback(request):
     actions = [0,1,21,22,23,31,32,33,41,42,43,51,52,53]
