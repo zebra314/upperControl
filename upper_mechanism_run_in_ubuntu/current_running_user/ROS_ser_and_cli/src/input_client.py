@@ -5,7 +5,7 @@ from std_msgs.msg import Int8
 from upper_control.srv import action,actionResponse
 
 def client(msg):
-    msg_to_server = rospy.ServiceProxy("action",action) 
+    msg_to_server = rospy.ServiceProxy("upper_mechanism",action) 
     response = msg_to_server(msg)
     print("Arudino :" , response.response)
     rate.sleep()
