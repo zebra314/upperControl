@@ -40,11 +40,11 @@ boolean downDC_arrive_front = 0;
 boolean pusher_arrive_down = 0;
 
 // to check the task being performed
-boolean zero_stage = 0;
-boolean first_stage = 0;
-boolean second_stage = 0;
-boolean third_stage = 0;
-boolean forth_stage = 0;
+int zero_stage = 0;
+int first_stage = 0;
+int second_stage = 0;
+int third_stage = 0;
+int forth_stage = 0;
 
 //timmer 
 unsigned long start_time;
@@ -375,7 +375,7 @@ void takeBall(int time) //取球
   }
   else if((time == 2 or time ==3) and first_stage != 0)
   {
-    takeBall_rest(first_stage)
+    takeBall_rest(first_stage);
   }
 }
 

@@ -42,10 +42,7 @@ if __name__ == '__main__':
     ser = serial.Serial('/dev/ttyUSB0',57600)
     ser.timeout = 3
     sleep(3)
-
-    # if arduino is ready , we will received "Ready"
-    arduino_echo = "Arduino :" + ser.readline().decode('utf').strip()
-    print(arduino_echo) 
+    print('arduino board connected')
     
     try:
         while True:
