@@ -26,18 +26,24 @@ const byte downbLimswit = 5; //下後
 const byte downfLimswit = 6; //下前
 const byte pusherLimswit = 4; //推桿
 
-String message;
-int topStepper_status;
-int downDC_status;
-int Pusher_status;
-int flywheel_status;
-int times = 0;
-
 // to check the position of topStepper , downDC and pusher
 boolean topStepper_arrive_back = 0;
 boolean downDC_arrive_back = 0;
 boolean downDC_arrive_front = 0;
 boolean pusher_arrive_down = 0;
+
+// the status of motors
+int topStepper_status;
+int downDC_status;
+int Pusher_status;
+int flywheel_status;
+
+String message;
+int takeBall_times = 0; // take ball times
+int throwBall_times = 0;
+
+//timmer 
+unsigned long start_time;
 
 // to check the task being performed
 int zero_stage = 0;
@@ -46,8 +52,7 @@ int second_stage = 0;
 int third_stage = 0;
 int forth_stage = 0;
 
-//timmer 
-unsigned long start_time;
+
 
 //pinMode setup
 void setup()
@@ -197,7 +202,6 @@ void downDC_task(int& status)
 }
 
 /* Programs about the motions of flywheel */
-#define speedIn 200
 #define speedOut 200
 void flywheel_task(int status) //flywheel
 {
@@ -214,13 +218,6 @@ void flywheel_task(int status) //flywheel
         digitalWrite(rDCmotor_IN2, LOW);
         digitalWrite(lDCmotor_IN1, speedOut);
         digitalWrite(lDCmotor_IN2, HIGH);
-    }
-    else if (status == 3) // 吸
-    {
-        digitalWrite(rDCmotor_IN1, speedIn);
-        digitalWrite(rDCmotor_IN2, HIGH);
-        digitalWrite(lDCmotor_IN1, speedIn);
-        digitalWrite(lDCmotor_IN2, LOW);
     }
 }
 
@@ -265,12 +262,12 @@ void Pusher_task(int& status)
     {
         PusherStop();
     }
-    else if (status == 2) //縮短
+    else if (status == 2) // down
     {
         pusher_arrive_down = 0;
         PusherDown(status);
     }
-    else if (status == 3) //伸長
+    else if (status == 3) // up
     {
         pusher_arrive_down = 0;
         PusherUp();
@@ -326,7 +323,7 @@ void takeBall_first(int& status)
         if(pusher_arrive_down == 1)
         {
             status = 5;
-            delay(1000); //等一秒 此時沒有馬達再動 直接用delay
+            delay(900); //等0.9秒 此時沒有馬達再動 直接用delay
             start_time = millis();
         }
     }
@@ -350,7 +347,7 @@ void takeBall_rest(int& status)
         if(pusher_arrive_down == 1)
         {
             status = 2;
-            delay(1000); //等一秒 此時沒有馬達再動 直接用delay
+            delay(900); //等0.9秒 此時沒有馬達再動 直接用delay
             start_time = millis();
         }
     }
@@ -362,21 +359,63 @@ void takeBall_rest(int& status)
             Pusher_status = 1;
             status = 0;
             Serial.println(message);
-            if(times == 3) {times = 0;}
         }
     }
 }
 
-void takeBall(int time) //取球
+void takeBall(int& time , int& status) //取球
 {
-  if(time == 1 and first_stage != 0)
-  {
-    takeBall_first(first_stage);
-  }
-  else if((time == 2 or time ==3) and first_stage != 0)
-  {
-    takeBall_rest(first_stage);
-  }
+    if(time == 1 and status != 0)
+    {
+        takeBall_first(status);
+    }
+    else if((time == 2 or time ==3) and status != 0)
+    {
+        takeBall_rest(status);
+        if(time == 3) {time = 0;}
+    }
+}
+
+void throwing_basketball(int& time )
+{
+    int status;
+    if(time == 1)
+    {
+        PusherUp(); // 不用停?
+        flywheel_task(2); 
+        delay(5000);    
+        status = 2;
+        downDC_task(status);
+        delay(4200);
+        status = 1;
+        downDC_task(status);
+        Serial.println(message);
+        time = 2;
+    }
+    else if(time == 2)
+    {
+        for(int i=0;i < 4000;i++)
+        {
+            status = 2;
+            topStepper_task(status);//走22cm 
+        }
+        Serial.println(message);
+        time = 3;       
+    }
+    else if(time == 3)
+    {
+        //上馬達gogo
+        status = 2;
+        for(int i = 0 ; i < 2000 ; i++)
+        {
+            topStepper_task(status);//走22cm 
+        }
+        delay(1000);
+        flywheel_task(1);   //球全出去後飛輪停止、推桿下來
+        StandardPosi();    
+        Serial.println(message);
+        time = 0;
+    }
 }
 
 /* Programs about processing the msg sended from the python_server */
@@ -403,12 +442,14 @@ void task(String message)
             zero_stage = 1;
             break;
         case '1': //take basketballs 
-            times++;
+            takeBall_times++;
             first_stage = 1;
             start_time = millis();
             break;
-        // case '2':
-        //     throwing_basketball();
+        case '2':
+            throwBall_times++;
+            throwing_basketball(throwBall_times);
+            break;
         // case '3':
         //     taking_bowling();
         // case '4':
@@ -419,7 +460,7 @@ void task(String message)
 void action()
 {
     standard_position(zero_stage);
-    takeBall(times);
+    takeBall(takeBall_times,first_stage);
 }
 
 void motorMove()
