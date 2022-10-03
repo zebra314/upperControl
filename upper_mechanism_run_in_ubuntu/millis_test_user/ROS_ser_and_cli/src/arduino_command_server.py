@@ -25,7 +25,7 @@ from upper_control.srv import action,actionResponse
 
 def callback(request):
     motion_pkg = [0,1,2,3,4]
-    actions = [21,22,23,31,32,33,41,42,43,51,52,53]
+    actions = [31,32,33,41,42,43,51,52,53,61,62,63]
     if(request.request in motion_pkg): 
         print('valid command')
         ser.write(bytes(str(request.request), 'utf-8'))

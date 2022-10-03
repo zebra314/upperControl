@@ -5,8 +5,8 @@ const byte topStepper_CLK = 38; // step
 const byte topStepper_CW  = 36; // direction
 
 //downDC
-const byte downDC_IN2 = 44; 
-const byte downDC_IN1 = 42; 
+const byte downDC_IN1 = 44; 
+const byte downDC_IN2 = 42; 
 const byte downDC_ENA = 8;
 
 // Pusher
@@ -289,7 +289,12 @@ void standard_position(int& status)
         Serial.println(message);
     }
 }
-
+void StandardPosi()
+{
+    Pusher_status = 2;
+    topStepper_status = 3;
+    downDC_status = 2;
+}
 void takeBall_first(int& status)
 {
     if(status == 1) //pusher抬高三秒
@@ -426,16 +431,16 @@ void task(String message)
     char motor_status = message[1];
     switch (motor_type)
     {
-        case '2': //上
+        case '3': //上
             topStepper_status = int(motor_status - '0');
             break;
-        case '3': //下
+        case '4': //下
             downDC_status = int(motor_status - '0');
             break;
-        case '4': //推桿
+        case '5': //推桿
             Pusher_status = int(motor_status - '0');
             break;
-        case '5': //飛輪
+        case '6': //飛輪
             flywheel_status = int(motor_status - '0');  
             break; 
         case '0': //standard position
