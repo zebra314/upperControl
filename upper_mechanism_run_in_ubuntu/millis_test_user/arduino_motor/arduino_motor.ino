@@ -6,7 +6,7 @@ const byte topStepper_CW  = 36; // direction
 
 //downDC
 const byte downDC_IN1 = 44; 
-const byte downDC_IN2 = 42; 
+const byte downDC_IN2 = 46; 
 const byte downDC_ENA = 8;
 
 // Pusher

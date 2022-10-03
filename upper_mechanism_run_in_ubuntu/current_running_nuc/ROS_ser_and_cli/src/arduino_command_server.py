@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# this program get the msg sended from client ,which we manually input ,and then send it to arduino
+# this program get the msg sended from client , and then send it to arduino
 
 import rospy
 from std_msgs.msg import Int8
@@ -17,10 +17,10 @@ from upper_control.srv import action,actionResponse
 '''
 
 def callback(request):
-    actions = [0,1]
+    actions = [0,1,2,3,4]
     if(request.request in actions): 
-        
-        # 如果 client 的 request 滿足要求 , send it to arduino
+
+        # if the request from the client is valid , send it to arduino
         ser.write(bytes(str(request.request), 'utf-8'))
         arduino_echo = ''
         while arduino_echo == '' :
@@ -30,7 +30,7 @@ def callback(request):
         print('Arduino :invalid command')
         request.request = -1
         
-    # 回傳response 給 client
+    # return the response to the client
     return actionResponse(request.request) 
 
 
@@ -42,18 +42,13 @@ if __name__ == '__main__':
     ser = serial.Serial('/dev/arduino_control',57600)
     ser.timeout = 3
     sleep(3)
+    print('arduino connected')
 
-    # if arduino is ready , we will received "Ready"
-    arduino_echo = "Arduino :" + ser.readline().decode('utf').strip()
-    print(arduino_echo) 
-    
+while True:   
     try:
-        while True:
-
-            # client 丟了一個 request 進來 , 呼叫callback
-            rospy.Service("upper_mechanism",action,callback) 
-            rospy.spin()
-
+        # if client send a request, call callback function
+        rospy.Service("upper_mechanism",action,callback) 
+        rospy.spin()
     except rospy.ROSInterruptException:
         ser.close()
         print('\nend')
