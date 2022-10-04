@@ -1,17 +1,18 @@
 /* This will be stored in the arduino board ,and receive the msg sended from the python server */
 
+//全部都用run in nuc 的
 // topStepper 
 const byte topStepper_CLK = 38; // step 
 const byte topStepper_CW  = 36; // direction
 
 //downDC
 const byte downDC_IN1 = 44; 
-const byte downDC_IN2 = 46; 
+const byte downDC_IN2 = 42; 
 const byte downDC_ENA = 8;
 
 // Pusher
 const byte Pusher_ENA = 9;
-const byte Pusher_IN1 = 50;
+const byte Pusher_IN1 = 50; 
 const byte Pusher_IN2 = 48;
  
 // rDCmotor + lDCmotor = flywheel
@@ -21,10 +22,10 @@ const byte lDCmotor_IN1 = 24; //speed
 const byte lDCmotor_IN2 = 26; //direction
 
 // limit switch 都接NO (觸發時為0)
-const byte topbLimswit = 7; //上後
-const byte downbLimswit = 5; //下後
-const byte downfLimswit = 6; //下前
-const byte pusherLimswit = 4; //推桿
+const byte topbLimswit = 4; //上後
+const byte downbLimswit = 6; //下後
+const byte downfLimswit = 5; //下前
+const byte pusherLimswit = 7; //推桿
 
 String message;
 int topStepper_status;
@@ -83,7 +84,8 @@ void topStepper_backward(int& status)
     }
     else if (digitalRead(topbLimswit) == 0)
     {
-        delay(150);
+
+        delay(400);
         while(digitalRead(topbLimswit) == 0)
         {
             // forward
@@ -119,7 +121,10 @@ void downDC_forward(int& status)
     }
     else if (digitalRead(downfLimswit) == 0)
     {
-        delay(150);
+        digitalWrite(downDC_IN1, LOW);
+        digitalWrite(downDC_IN2, LOW);
+        analogWrite(downDC_ENA, 0);
+        delay(400);
         while(digitalRead(downfLimswit) == 0)
         {
             //backward
@@ -142,7 +147,10 @@ void downDC_backward(int& status)
     }
     else if (digitalRead(downbLimswit) == 0)
     {
-        delay(150);
+        digitalWrite(downDC_IN1, LOW);
+        digitalWrite(downDC_IN2, LOW);
+        analogWrite(downDC_ENA, 0);
+        delay(400);
         while(digitalRead(downbLimswit) == 0)
         {
             //forward
@@ -219,7 +227,8 @@ void PusherDown(int& status)
     }
     else if(digitalRead(pusherLimswit) == 0)
     {
-        delay(150);
+        PusherStop();
+        delay(400);
         while(digitalRead(pusherLimswit) == 0)
         {
             PusherUp();
@@ -257,14 +266,8 @@ void StandardPosi()
     Pusher_status = 2;
     topStepper_status = 3;
     downDC_status = 2;
+    Serial.println(message);
 }
-
-void releaseBall()
-{
-    flywheel_status = 2;
-    topStepper_status = 2;
-}
-
 
 void takeBall(int& time) //取球
 {
@@ -306,6 +309,7 @@ void takeBall(int& time) //取球
     PusherUp(); //up
     delay(5000);
     PusherStop();
+    Serial.println(message);
   }
   
   else if(time == 2 or time ==3)
@@ -314,17 +318,17 @@ void takeBall(int& time) //取球
     {
       PusherDown(Pusher_status); //down
     }
-        PusherStop();
-        delay(1000);
-        PusherUp(); //up
-        delay(5000);
-        PusherStop();
+    PusherStop();
+    delay(1000);
+    PusherUp(); //up
+    delay(5000);
+    PusherStop();
+    Serial.println(message);
     if(time == 3)
     {
-      time = 0;
+        time = 0;
     }
   }
-
 }
 
 void throwing_basketball(int& time )
@@ -341,6 +345,7 @@ void throwing_basketball(int& time )
         status = 1;
         downDC_task(status);
         time = 2;
+        Serial.println(message);
     }
     else if(time == 2)
     {
@@ -349,7 +354,8 @@ void throwing_basketball(int& time )
             status = 2;
             topStepper_task(status);//走22cm 
         }
-        time = 3;       
+        time = 3;
+        Serial.println(message);       
     }
     else if(time == 3)
     {
@@ -367,7 +373,6 @@ void throwing_basketball(int& time )
 }
 
 /* Programs about processing the msg sended from the python_server */
-
 void action(String message)
 {
     char motor_type = message[0];
@@ -388,7 +393,20 @@ void action(String message)
         // case '3':
         //     taking_bowling();
         // case '4':
-        //     relasing_bowling();            
+        //     relasing_bowling();   
+
+        case '5': //上
+            topStepper_status = int(motor_status - '0');
+            break;
+        case '6': //下
+            downDC_status = int(motor_status - '0');
+            break;
+        case '7': //推桿
+            Pusher_status = int(motor_status - '0');
+            break;
+        case '8': //飛輪
+            flywheel_status = int(motor_status - '0');  
+            break;                 
     }
 }
 
@@ -406,7 +424,6 @@ void loop()
     {
         message = Serial.readString();
         action(message);
-        Serial.println(message);
     }
     motorMove();
 }

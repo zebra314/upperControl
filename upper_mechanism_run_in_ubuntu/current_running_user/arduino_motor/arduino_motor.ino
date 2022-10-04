@@ -5,26 +5,26 @@ const byte topStepper_CLK = 38; // step
 const byte topStepper_CW  = 36; // direction
 
 //downDC
-const byte downDC_IN2 = 44; 
-const byte downDC_IN1 = 42; 
+const byte downDC_IN1 = 44; 
+const byte downDC_IN2 = 42; 
 const byte downDC_ENA = 8;
 
 // Pusher
 const byte Pusher_ENA = 9;
-const byte Pusher_IN1 = 50;
+const byte Pusher_IN1 = 50; 
 const byte Pusher_IN2 = 48;
  
-// rDCmotor 右馬達,  lDCmotor 左馬達 => flywheel
+// rDCmotor + lDCmotor = flywheel
 const byte rDCmotor_IN1 = 32; //speed 
 const byte rDCmotor_IN2 = 30; //direction
 const byte lDCmotor_IN1 = 24; //speed 
 const byte lDCmotor_IN2 = 26; //direction
 
-//限位開關 都接NO (觸發時為0)
-const byte topbLimswit = 7; //上後
-const byte downbLimswit = 5; //下後
-const byte downfLimswit = 6; //下前
-const byte pusherLimswit = 4; //推桿
+// limit switch 都接NO (觸發時為0)
+const byte topbLimswit = 4; //上後
+const byte downbLimswit = 6; //下後
+const byte downfLimswit = 5; //下前
+const byte pusherLimswit = 7; //推桿
 
 String message;
 int topStepper_status;
