@@ -31,9 +31,8 @@ int topStepper_status;
 int downDC_status;
 int Pusher_status;
 int flywheel_status;
-int takeBall_status;
-int times = 0;
-int throwBall_times = 0;
+int takeBasket_times = 0;
+int throwBasket_times = 0;
 int throwBowling_times = 0;
 
 void setup()
@@ -479,18 +478,18 @@ void action(String message)
             StandardPosi();
             break;
         case '1': //take basketballs 
-            times++;
-            takeBall(times);
+            takeBasket_times++;
+            takeBall(takeBasket_times);
             break;
         case '2': //throwing basketball
-            throwBall_times++;
-            throwing_basketball(throwBall_times);
+            throwBasket_times++;
+            throwing_basketball(throwBasket_times);
             break;
         case '3':
             taking_bowling();
         case '4':
             throwBowling_times++;
-            relasing_bowling(throwBowling_times);   
+            releasing_bowling(throwBowling_times);   
         case '5': //上
             topStepper_status = int(motor_status - '0');
             break;
