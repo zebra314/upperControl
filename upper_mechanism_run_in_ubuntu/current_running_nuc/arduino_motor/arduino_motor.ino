@@ -34,6 +34,7 @@ int flywheel_status;
 int takeBall_status;
 int times = 0;
 int throwBall_times = 0;
+int throwBowling_times = 0;
 
 void setup()
 {
@@ -307,23 +308,23 @@ void takeBall(int& time) //取球
         PusherStop();
         Serial.println(message);
     } 
-  else if(time == 2 or time ==3)
-  {
-    while(digitalRead(pusherLimswit) == 1)
+    else if(time == 2 or time ==3)
     {
-      PusherDown(Pusher_status); //down
+        while(digitalRead(pusherLimswit) == 1)
+        {
+            PusherDown(Pusher_status); //down
+        }
+        PusherStop();
+        delay(1000);
+        PusherUp(); //up
+        delay(5000);
+        PusherStop();
+        Serial.println(message);
+        if(time == 3)
+        {
+            time = 0;
+        }
     }
-    PusherStop();
-    delay(1000);
-    PusherUp(); //up
-    delay(5000);
-    PusherStop();
-    Serial.println(message);
-    if(time == 3)
-    {
-        time = 0;
-    }
-  }
 }
 
 void throwing_basketball(int& time )
@@ -424,7 +425,7 @@ void taking_bowling()
     Serial.println(message);
 }
 
-void releasing_bowling()
+void releasing_bowling(int& time)
 {
     int status;
     if(time == 1)
@@ -488,7 +489,8 @@ void action(String message)
         case '3':
             taking_bowling();
         case '4':
-            relasing_bowling();   
+            throwBowling_times++;
+            relasing_bowling(throwBowling_times);   
         case '5': //上
             topStepper_status = int(motor_status - '0');
             break;
