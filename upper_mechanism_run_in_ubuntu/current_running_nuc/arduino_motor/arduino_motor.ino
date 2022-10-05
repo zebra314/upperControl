@@ -487,9 +487,8 @@ void action(String message)
             break;
         case '3':
             taking_bowling();
-        // case '4':
-        //     relasing_bowling();   
-
+        case '4':
+            relasing_bowling();   
         case '5': //上
             topStepper_status = int(motor_status - '0');
             break;
