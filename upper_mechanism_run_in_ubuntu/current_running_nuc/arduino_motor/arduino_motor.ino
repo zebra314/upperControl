@@ -1,6 +1,5 @@
 /* This will be stored in the arduino board ,and receive the msg sended from the python server */
 
-//全部都用run in nuc 的
 // topStepper 
 const byte topStepper_CLK = 38; // step 
 const byte topStepper_CW  = 36; // direction
@@ -200,13 +199,6 @@ void flywheel_task(int status) //flywheel
         digitalWrite(lDCmotor_IN1, speedIn);
         digitalWrite(lDCmotor_IN2, LOW);
     }
-    else if (status == 3) // 吸
-    {
-        digitalWrite(rDCmotor_IN1, speedOut);
-        digitalWrite(rDCmotor_IN2, LOW);
-        digitalWrite(lDCmotor_IN1, speedOut);
-        digitalWrite(lDCmotor_IN2, HIGH);
-    }
 }
 
 /* Programs about the motions of Pusher */
@@ -271,8 +263,112 @@ void StandardPosi()
 
 void takeBall(int& time) //取球
 {
-  if(time == 1)
+    if(time == 1)
+    {
+        PusherUp(); //up
+        delay(5000);
+        PusherStop(); //stop
+        while(digitalRead(downbLimswit) == 1)
+        {
+            //backward
+            digitalWrite(downDC_IN1, LOW);
+            digitalWrite(downDC_IN2, HIGH);
+            analogWrite(downDC_ENA, 150);
+        }
+        digitalWrite(downDC_IN1, LOW);
+        digitalWrite(downDC_IN2, LOW);
+        analogWrite(downDC_ENA, 0);
+        delay(300);
+        while(digitalRead(downbLimswit) == 0)
+        {
+            //forward
+            digitalWrite(downDC_IN1, HIGH);
+            digitalWrite(downDC_IN2, LOW);
+            analogWrite(downDC_ENA, 150);
+        }
+        while (digitalRead(topbLimswit) == 1)
+        {
+            // backward
+            StepperGo(topStepper_CW,topStepper_CLK,1);
+        }
+        while(digitalRead(topbLimswit) == 0)
+        {
+            // forward
+            StepperGo(topStepper_CW,topStepper_CLK,0); 
+        }
+        while(digitalRead(pusherLimswit) == 1)
+        {
+            PusherDown(Pusher_status); //down
+        }
+        PusherStop();
+        delay(1000);
+        PusherUp(); //up
+        delay(5000);
+        PusherStop();
+        Serial.println(message);
+    } 
+  else if(time == 2 or time ==3)
   {
+    while(digitalRead(pusherLimswit) == 1)
+    {
+      PusherDown(Pusher_status); //down
+    }
+    PusherStop();
+    delay(1000);
+    PusherUp(); //up
+    delay(5000);
+    PusherStop();
+    Serial.println(message);
+    if(time == 3)
+    {
+        time = 0;
+    }
+  }
+}
+
+void throwing_basketball(int& time )
+{
+    int status;
+    if(time == 1)
+    {
+        PusherUp();
+        flywheel_task(2); 
+        delay(5000);    
+        status = 2;
+        downDC_task(status);
+        delay(4200);
+        status = 1;
+        downDC_task(status);
+        time = 2;
+        Serial.println(message);
+    }
+    else if(time == 2)
+    {
+        for(int i=0;i < 4000;i++)
+        {
+            status = 2;
+            topStepper_task(status);//走22cm 
+        }
+        time = 3;
+        Serial.println(message);       
+    }
+    else if(time == 3)
+    {
+        //上馬達gogo
+        status = 2;
+        for(int i = 0 ; i < 2000 ; i++)
+        {
+            topStepper_task(status);//走22cm 
+        }
+        delay(1000);
+        flywheel_task(1);   //球全出去後飛輪停止、推桿下來
+        StandardPosi();    
+        time = 0;
+    }
+}
+
+void taking_bowling()
+{
     PusherUp(); //up
     delay(5000);
     PusherStop(); //stop
@@ -283,6 +379,10 @@ void takeBall(int& time) //取球
         digitalWrite(downDC_IN2, HIGH);
         analogWrite(downDC_ENA, 150);
     }
+    digitalWrite(downDC_IN1, LOW);
+    digitalWrite(downDC_IN2, LOW);
+    analogWrite(downDC_ENA, 0);
+    delay(300);
     while(digitalRead(downbLimswit) == 0)
     {
         //forward
@@ -309,34 +409,29 @@ void takeBall(int& time) //取球
     PusherUp(); //up
     delay(5000);
     PusherStop();
-    Serial.println(message);
-  }
-  
-  else if(time == 2 or time ==3)
-  {
-    while(digitalRead(pusherLimswit) == 1)
+    for(int i=1 ; i<3 ; i++)
     {
-      PusherDown(Pusher_status); //down
+        while(digitalRead(pusherLimswit) == 1)
+        {
+            PusherDown(Pusher_status); //down
+        }
+        PusherStop();
+        delay(1000);
+        PusherUp(); //up
+        delay(5000);
+        PusherStop();
     }
-    PusherStop();
-    delay(1000);
-    PusherUp(); //up
-    delay(5000);
-    PusherStop();
     Serial.println(message);
-    if(time == 3)
-    {
-        time = 0;
-    }
-  }
 }
 
-void throwing_basketball(int& time )
+void releasing_bowling()
 {
     int status;
     if(time == 1)
     {
-        PusherUp(); // 不用停?
+        PusherUp();
+        delay(1000);
+        PusherStop();
         flywheel_task(2); 
         delay(5000);    
         status = 2;
@@ -390,8 +485,8 @@ void action(String message)
             throwBall_times++;
             throwing_basketball(throwBall_times);
             break;
-        // case '3':
-        //     taking_bowling();
+        case '3':
+            taking_bowling();
         // case '4':
         //     relasing_bowling();   
 
