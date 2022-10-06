@@ -1,6 +1,6 @@
 /* This will be stored in the arduino board ,and receive the msg sended from the python server */
 
-// topStepper 
+// topSteppe1`qr 
 const byte topStepper_CLK = 38; // step 
 const byte topStepper_CW  = 36; // direction
 
@@ -286,16 +286,9 @@ void takeBall(int& time) //取球
             digitalWrite(downDC_IN2, LOW);
             analogWrite(downDC_ENA, 150);
         }
-        while (digitalRead(topbLimswit) == 1)
-        {
-            // backward
-            StepperGo(topStepper_CW,topStepper_CLK,1);
-        }
-        while(digitalRead(topbLimswit) == 0)
-        {
-            // forward
-            StepperGo(topStepper_CW,topStepper_CLK,0); 
-        }
+        digitalWrite(downDC_IN1, LOW);
+        digitalWrite(downDC_IN2, LOW);
+        analogWrite(downDC_ENA, 0);
         while(digitalRead(pusherLimswit) == 1)
         {
             PusherDown(Pusher_status); //down
@@ -332,14 +325,13 @@ void throwing_basketball(int& time )
     if(time == 1)
     {
         PusherUp();
-        flywheel_task(2); 
+        // flywheel_task(2); 
         delay(5000);    
         status = 2;
-        downDC_task(status);
+        downDC_task(status); //forward
         delay(4200);
         status = 1;
-        downDC_task(status);
-        time = 2;
+        downDC_task(status); // stop
         Serial.println(message);
     }
     else if(time == 2)
@@ -349,7 +341,6 @@ void throwing_basketball(int& time )
             status = 2;
             topStepper_task(status);//走22cm 
         }
-        time = 3;
         Serial.println(message);       
     }
     else if(time == 3)
@@ -361,7 +352,7 @@ void throwing_basketball(int& time )
             topStepper_task(status);//走22cm 
         }
         delay(1000);
-        flywheel_task(1);   //球全出去後飛輪停止、推桿下來
+        // flywheel_task(1);   //球全出去後飛輪停止、推桿下來
         StandardPosi();    
         time = 0;
     }
@@ -369,6 +360,7 @@ void throwing_basketball(int& time )
 
 void taking_bowling()
 {
+    
     PusherUp(); //up
     delay(5000);
     PusherStop(); //stop
