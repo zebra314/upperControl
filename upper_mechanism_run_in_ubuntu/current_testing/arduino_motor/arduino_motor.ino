@@ -195,9 +195,9 @@ void flywheel_task(int status) //flywheel
     else if (status == 2) // 噴
     {
         digitalWrite(rDCmotor_IN1, speedIn);
-        digitalWrite(rDCmotor_IN2, HIGH);
+        digitalWrite(rDCmotor_IN2, LOW);
         digitalWrite(lDCmotor_IN1, speedIn);
-        digitalWrite(lDCmotor_IN2, LOW);
+        digitalWrite(lDCmotor_IN2, HIGH);
     }
 }
 
@@ -473,7 +473,17 @@ void throwing_basketball_third()
 
 void taking_bowling()
 {
-    
+    while (digitalRead(topbLimswit) == 1)
+    {
+        // backward
+        StepperGo(topStepper_CW,topStepper_CLK,1);
+    }
+    delay(200);
+    while(digitalRead(topbLimswit) == 0)
+    {
+        // forward
+        StepperGo(topStepper_CW,topStepper_CLK,0); 
+    }
     PusherUp(); //up
     delay(5000);
     PusherStop(); //stop
@@ -498,16 +508,6 @@ void taking_bowling()
     digitalWrite(downDC_IN1, LOW);
     digitalWrite(downDC_IN2, LOW);
     analogWrite(downDC_ENA, 0);
-    while (digitalRead(topbLimswit) == 1)
-    {
-        // backward
-        StepperGo(topStepper_CW,topStepper_CLK,1);
-    }
-    while(digitalRead(topbLimswit) == 0)
-    {
-        // forward
-        StepperGo(topStepper_CW,topStepper_CLK,0); 
-    }
     while(digitalRead(pusherLimswit) == 1)
     {
         PusherDown(Pusher_status); //down
@@ -534,7 +534,17 @@ void taking_bowling()
 
 void taking_bowling_first()
 {
-    
+    while (digitalRead(topbLimswit) == 1)
+    {
+        // backward
+        StepperGo(topStepper_CW,topStepper_CLK,1);
+    }
+    delay(200);
+    while(digitalRead(topbLimswit) == 0)
+    {
+        // forward
+        StepperGo(topStepper_CW,topStepper_CLK,0); 
+    }
     PusherUp(); //up
     delay(5000);
     PusherStop(); //stop
@@ -556,17 +566,9 @@ void taking_bowling_first()
         digitalWrite(downDC_IN2, LOW);
         analogWrite(downDC_ENA, 150);
     }
-    while (digitalRead(topbLimswit) == 1)
-    {
-        // backward
-        StepperGo(topStepper_CW,topStepper_CLK,1);
-    }
-    delay(200);
-    while(digitalRead(topbLimswit) == 0)
-    {
-        // forward
-        StepperGo(topStepper_CW,topStepper_CLK,0); 
-    }
+    digitalWrite(downDC_IN1, LOW);
+    digitalWrite(downDC_IN2, LOW);
+    analogWrite(downDC_ENA, 0);
     while(digitalRead(pusherLimswit) == 1)
     {
         PusherDown(Pusher_status); //down

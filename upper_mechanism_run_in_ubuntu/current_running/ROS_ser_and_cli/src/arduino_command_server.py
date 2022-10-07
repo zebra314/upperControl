@@ -10,11 +10,11 @@
 # Pusher      71 stop, 72 forward, 73 backward
 # flywheel    81 stop, 82 shoot
 
-# 0 , standard position
-# 1 , taking basketball
-# 2 , throwing basketball
-# 3 , taking bowling
-# 4 , relasing bowling
+# 0 , standard position 
+# 1 , taking basketball     11,12,13
+# 2 , throwing basketball   21,22,23
+# 3 , taking bowling        31,32,33
+# 4 , relasing bowling      41,42,43
 
 import rospy
 from std_msgs.msg import Int8
