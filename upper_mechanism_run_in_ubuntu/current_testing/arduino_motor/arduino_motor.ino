@@ -319,43 +319,156 @@ void takeBall(int& time) //取球
     }
 }
 
+void takeBall_first() //取球
+{
+    PusherUp(); //up
+    delay(5000);
+    PusherStop(); //stop
+    while(digitalRead(downbLimswit) == 1)
+    {
+        //backward
+        digitalWrite(downDC_IN1, LOW);
+        digitalWrite(downDC_IN2, HIGH);
+        analogWrite(downDC_ENA, 150);
+    }
+    digitalWrite(downDC_IN1, LOW);
+    digitalWrite(downDC_IN2, LOW);
+    analogWrite(downDC_ENA, 0);
+    delay(300);
+    while(digitalRead(downbLimswit) == 0)
+    {
+        //forward
+        digitalWrite(downDC_IN1, HIGH);
+        digitalWrite(downDC_IN2, LOW);
+        analogWrite(downDC_ENA, 150);
+    }
+    digitalWrite(downDC_IN1, LOW);
+    digitalWrite(downDC_IN2, LOW);
+    analogWrite(downDC_ENA, 0);
+    while(digitalRead(pusherLimswit) == 1)
+    {
+        PusherDown(Pusher_status); //down
+    }
+    PusherStop();
+    delay(1000);
+    PusherUp(); //up
+    delay(5000);
+    PusherStop();
+    Serial.println(message);
+}
+void takeBall_second() //取球
+{
+    while(digitalRead(pusherLimswit) == 1)
+    {
+        PusherDown(Pusher_status); //down
+    }
+    PusherStop();
+    delay(1000);
+    PusherUp(); //up
+    delay(5000);
+    PusherStop();
+    Serial.println(message);
+}
+void takeBall_third() //取球
+{
+    while(digitalRead(pusherLimswit) == 1)
+    {
+        PusherDown(Pusher_status); //down
+    }
+    PusherStop();
+    delay(1000);
+    PusherUp(); //up
+    delay(5000);
+    PusherStop();
+    Serial.println(message);
+}
 void throwing_basketball(int& time )
 {
     int status;
     if(time == 1)
     {
         PusherUp();
+        delay(2000);
         // flywheel_task(2); 
-        delay(5000);    
+        delay(1000);    
         status = 2;
         downDC_task(status); //forward
         delay(4200);
         status = 1;
         downDC_task(status); // stop
+        // flywheel_task(1);
         Serial.println(message);
     }
     else if(time == 2)
     {
+        // flywheel_task(2); 
+        // delay(2000);
         for(int i=0;i < 4000;i++)
         {
             status = 2;
             topStepper_task(status);//走22cm 
         }
+        // flywheel_task(1);
         Serial.println(message);       
     }
     else if(time == 3)
     {
-        //上馬達gogo
+        // flywheel_task(2); 
+        // delay(2000);
         status = 2;
-        for(int i = 0 ; i < 2000 ; i++)
+        for(int i = 0 ; i < 2000 ; i++) //步數要重新測量
         {
             topStepper_task(status);//走22cm 
         }
         delay(1000);
-        // flywheel_task(1);   //球全出去後飛輪停止、推桿下來
+        // flywheel_task(1);   
         StandardPosi();    
         time = 0;
     }
+}
+
+void throwing_basketball_first()
+{
+    int status;
+    PusherUp();
+    delay(2000);
+    // flywheel_task(2); 
+    delay(1000);    
+    status = 2;
+    downDC_task(status); //forward
+    delay(4200);
+    status = 1;
+    downDC_task(status); // stop
+    // flywheel_task(1);
+    Serial.println(message);
+}
+
+void throwing_basketball_second()
+{
+    int status;
+    // flywheel_task(2); 
+    // delay(2000);
+    for(int i=0;i < 4000;i++)
+    {
+        status = 2;
+        topStepper_task(status);//走22cm 
+    }
+    // flywheel_task(1);
+    Serial.println(message);       
+}
+void throwing_basketball_third()
+{
+    int status;
+    // flywheel_task(2); 
+    // delay(2000);
+    status = 2;
+    for(int i = 0 ; i < 2000 ; i++) //步數要重新測量
+    {
+        topStepper_task(status);//走22cm 
+    }
+    delay(1000);
+    // flywheel_task(1);   
+    StandardPosi();    
 }
 
 void taking_bowling()
@@ -382,6 +495,9 @@ void taking_bowling()
         digitalWrite(downDC_IN2, LOW);
         analogWrite(downDC_ENA, 150);
     }
+    digitalWrite(downDC_IN1, LOW);
+    digitalWrite(downDC_IN2, LOW);
+    analogWrite(downDC_ENA, 0);
     while (digitalRead(topbLimswit) == 1)
     {
         // backward
@@ -413,6 +529,79 @@ void taking_bowling()
         delay(5000);
         PusherStop();
     }
+    Serial.println(message);
+}
+
+void taking_bowling_first()
+{
+    
+    PusherUp(); //up
+    delay(5000);
+    PusherStop(); //stop
+    while(digitalRead(downbLimswit) == 1)
+    {
+        //backward
+        digitalWrite(downDC_IN1, LOW);
+        digitalWrite(downDC_IN2, HIGH);
+        analogWrite(downDC_ENA, 150);
+    }
+    digitalWrite(downDC_IN1, LOW);
+    digitalWrite(downDC_IN2, LOW);
+    analogWrite(downDC_ENA, 0);
+    delay(300);
+    while(digitalRead(downbLimswit) == 0)
+    {
+        //forward
+        digitalWrite(downDC_IN1, HIGH);
+        digitalWrite(downDC_IN2, LOW);
+        analogWrite(downDC_ENA, 150);
+    }
+    while (digitalRead(topbLimswit) == 1)
+    {
+        // backward
+        StepperGo(topStepper_CW,topStepper_CLK,1);
+    }
+    delay(200);
+    while(digitalRead(topbLimswit) == 0)
+    {
+        // forward
+        StepperGo(topStepper_CW,topStepper_CLK,0); 
+    }
+    while(digitalRead(pusherLimswit) == 1)
+    {
+        PusherDown(Pusher_status); //down
+    }
+    PusherStop();
+    delay(1000);
+    PusherUp(); //up
+    delay(5000);
+    PusherStop();
+    Serial.println(message);
+}
+void taking_bowling_second()
+{
+    while(digitalRead(pusherLimswit) == 1)
+    {
+        PusherDown(Pusher_status); //down
+    }
+    PusherStop();
+    delay(1000);
+    PusherUp(); //up
+    delay(5000);
+    PusherStop();
+    Serial.println(message);
+}
+void taking_bowling_third()
+{
+    while(digitalRead(pusherLimswit) == 1)
+    {
+        PusherDown(Pusher_status); //down
+    }
+    PusherStop();
+    delay(1000);
+    PusherUp(); //up
+    delay(5000);
+    PusherStop();
     Serial.println(message);
 }
 
@@ -458,6 +647,46 @@ void releasing_bowling(int& time)
         time = 0;
     }
 }
+void releasing_bowling_first()
+{
+    int status;
+    PusherUp();
+    delay(1000);
+    PusherStop();
+    flywheel_task(2); 
+    delay(5000);    
+    status = 2;
+    downDC_task(status);
+    delay(4200);
+    status = 1;
+    downDC_task(status);
+    Serial.println(message);
+}
+
+void releasing_bowling_second()
+{
+    int status;
+    for(int i=0;i < 4000;i++)
+    {
+        status = 2;
+        topStepper_task(status);//走22cm 
+    }
+    Serial.println(message);       
+}
+
+void releasing_bowling_third()
+{
+    int status;
+    //上馬達gogo
+    status = 2;
+    for(int i = 0 ; i < 2000 ; i++)
+    {
+        topStepper_task(status);//走22cm 
+    }
+    delay(1000);
+    flywheel_task(1);   //球全出去後飛輪停止、推桿下來
+    StandardPosi();    
+}
 
 /* Programs about processing the msg sended from the python_server */
 void action(String message)
@@ -469,19 +698,81 @@ void action(String message)
         case '0': //standard position
             StandardPosi();
             break;
-        case '1': //take basketballs 
-            takeBasket_times++;
-            takeBall(takeBasket_times);
+        case '1': 
+            if(motor_status == NULL)
+            {
+                takeBasket_times++;
+                takeBall(takeBasket_times);
+            }
+            else if(motor_status == '1')
+            {
+                takeBall_first();
+            }
+            else if(motor_status == '2')
+            {
+                takeBall_second();
+            }
+            else if(motor_status == '3')
+            {
+                takeBall_third();
+            }
             break;
         case '2': //throwing basketball
-            throwBasket_times++;
-            throwing_basketball(throwBasket_times);
+            if(motor_status == NULL)
+            {
+                throwBasket_times++;
+                throwing_basketball(throwBasket_times);
+            }
+            else if(motor_status == '1')
+            {
+                throwing_basketball_first();
+            }
+            else if(motor_status == '2')
+            {
+                throwing_basketball_second();
+            }
+            else if(motor_status == '3')
+            {
+                throwing_basketball_third();
+            }
             break;
         case '3':
-            taking_bowling();
+            if(motor_status == NULL)
+            {
+                taking_bowling();
+            }
+            else if(motor_status == '1')
+            {
+                taking_bowling_first();
+            }
+            else if(motor_status == '2')
+            {
+                taking_bowling_second();
+            }
+            else if(motor_status == '3')
+            {
+                taking_bowling_third();
+            }
+            break;
         case '4':
-            throwBowling_times++;
-            releasing_bowling(throwBowling_times);   
+            if(motor_status == NULL)
+            {
+                throwBowling_times++;
+                releasing_bowling(throwBowling_times);   
+            }
+            else if(motor_status == '1')
+            {
+                releasing_bowling_first();
+            }
+            else if(motor_status == '2')
+            {
+                releasing_bowling_second();
+            }
+            else if(motor_status == '3')
+            {
+                releasing_bowling_third();
+            }
+            break;  
         case '5': //上
             topStepper_status = int(motor_status - '0');
             break;
