@@ -36,8 +36,11 @@ int throwBasket_status = 0;
 int throwBowling_status = 0;
 
 int takeBasket_times = 0;
+int takeBowling_times = 0;
 int throwBasket_times = 0;
 int throwBowling_times = 0;
+
+int start_time = 0;
 
 void setup()
 {
@@ -58,7 +61,6 @@ void setup()
     pinMode(downfLimswit, INPUT_PULLUP);
     pinMode(downbLimswit, INPUT_PULLUP);
     pinMode(pusherLimswit, INPUT_PULLUP);
-    
 }
 
 /* Programs about the motions of Stepper */
@@ -257,6 +259,8 @@ void Pusher_task(int& status)
 }
 
 /* Programs about the task */
+
+//standard position
 void StandardPosi()
 {
     Pusher_status = 2;
@@ -265,7 +269,8 @@ void StandardPosi()
     Serial.println(message);
 }
 
-void takeBall(int& time) //取球
+//take bowlingball (take one ball at a time)
+void takeBowling_three(int& time) 
 {
     if(time == 1)
     {
@@ -341,41 +346,204 @@ void takeBall(int& time) //取球
     }
 }
 
-int start_time = 0;
-void throwing_basketball_test(int& time , int& status)
+//take basketball (take one ball at a time)
+void takeBasket_three(int& time) 
 {
-    int a = millis()-start_time ;
+    if(time == 1)
+    {
+        PusherUp(); //up
+        delay(5750);
+        PusherStop(); //stop
+        while(digitalRead(downbLimswit) == 1)
+        {
+            //backward
+            digitalWrite(downDC_IN1, LOW);
+            digitalWrite(downDC_IN2, HIGH);
+            analogWrite(downDC_ENA, 150);
+        }
+        while(digitalRead(downbLimswit) == 1)
+        {
+            //backward
+            digitalWrite(downDC_IN1, LOW);
+            digitalWrite(downDC_IN2, HIGH);
+            analogWrite(downDC_ENA, 150);
+        }
+        digitalWrite(downDC_IN1, LOW);
+        digitalWrite(downDC_IN2, LOW);
+        analogWrite(downDC_ENA, 0);
+        delay(300);
+        while(digitalRead(downbLimswit) == 0)
+        {
+            //forward
+            digitalWrite(downDC_IN1, HIGH);
+            digitalWrite(downDC_IN2, LOW);
+            analogWrite(downDC_ENA, 150);
+        }
+        digitalWrite(downDC_IN1, LOW);
+        digitalWrite(downDC_IN2, LOW);
+        analogWrite(downDC_ENA, 0);
+        while(digitalRead(pusherLimswit) == 1)
+        {
+            PusherDown(Pusher_status); //down
+        }
+        PusherStop();
+        delay(2500);
+        PusherUp(); //up
+        delay(5500);
+        PusherStop();
+        Serial.println(message);
+    } 
+    else if(time == 2)
+    {
+        while(digitalRead(pusherLimswit) == 1)
+        {
+            PusherDown(Pusher_status); //down
+        }
+        PusherStop();
+        delay(3000);
+        PusherUp(); //up
+        delay(3000);
+        PusherStop();
+        Serial.println(message);
+      
+    }
+    else if(time ==3)
+    {
+        while(digitalRead(pusherLimswit) == 1)
+        {
+            PusherDown(Pusher_status); //down
+        }
+        PusherStop();
+        delay(300);
+        PusherUp(); //up
+        delay(4500);
+        PusherStop();
+        Serial.println(message);
+        time = 0;
+    }
+}
+
+//take basketball (take one ball at a time)
+void takeBasket_Two_One(int& time) 
+{
+    if(time == 1)
+    {
+        PusherUp(); //up
+        delay(5750);
+        PusherStop(); //stop
+        while(digitalRead(downbLimswit) == 1)
+        {
+            //backward
+            digitalWrite(downDC_IN1, LOW);
+            digitalWrite(downDC_IN2, HIGH);
+            analogWrite(downDC_ENA, 150);
+        }
+        while(digitalRead(downbLimswit) == 1)
+        {
+            //backward
+            digitalWrite(downDC_IN1, LOW);
+            digitalWrite(downDC_IN2, HIGH);
+            analogWrite(downDC_ENA, 150);
+        }
+        digitalWrite(downDC_IN1, LOW);
+        digitalWrite(downDC_IN2, LOW);
+        analogWrite(downDC_ENA, 0);
+        delay(300);
+        while(digitalRead(downbLimswit) == 0)
+        {
+            //forward
+            digitalWrite(downDC_IN1, HIGH);
+            digitalWrite(downDC_IN2, LOW);
+            analogWrite(downDC_ENA, 150);
+        }
+        digitalWrite(downDC_IN1, LOW);
+        digitalWrite(downDC_IN2, LOW);
+        analogWrite(downDC_ENA, 0);
+        while(digitalRead(pusherLimswit) == 1)
+        {
+            PusherDown(Pusher_status); //down
+        }
+        PusherStop();
+        delay(2500);
+        PusherUp(); //up
+        delay(5500);
+        PusherStop();
+        Serial.println(message);
+    } 
+    else if(time == 2)
+    {
+        while(digitalRead(pusherLimswit) == 1)
+        {
+            PusherDown(Pusher_status); //down
+        }
+        PusherStop();
+        delay(3000);
+        PusherUp(); //up
+        delay(4000);
+        PusherStop();
+        Serial.println(message);
+      
+    }
+    else if(time ==3)
+    {
+        PusherUp(); //up
+        delay(5750);
+        PusherStop(); //stop
+        while(digitalRead(pusherLimswit) == 1)
+        {
+            PusherDown(Pusher_status); //down
+        }
+        PusherStop();
+        delay(300);
+        PusherUp(); //up
+        delay(4500);
+        PusherStop();
+        Serial.println(message);
+        time = 0;
+    }
+}
+
+
+//throw basketball (throw one ball at a time)
+void throwing_basketball_three(int& time , int& status)
+{
+    int duration = millis()-start_time ;
     if(time == 1)
     {
         if(status == 1)
         {
             PusherUp();
-            delay(5000);
+            delay(5000); 
             PusherStop();
+            // delay(200);
+            // PusherDown(Pusher_status);
+            // delay(1440);
+            // PusherStop();
             status = 2;
             start_time = millis();
         }
-        else if(status == 2 and a < 3500 )
+        else if(status == 2 and duration < 4000 ) 
         {
             flywheel_task(2);
         }
-        else if(status == 2 and a > 3500 )
+        else if(status == 2 and duration > 4000 )
         {
             status = 3;
             start_time = millis();
         }
-        else if(status == 3 and a < 3000 )
+        else if(status == 3 and duration < 3000 ) //秒數待訂
         {
+            //downDC , topStepper , flywheel be activated at the same time 
             int DCstatus = 2;
-            downDC_task(DCstatus); //forward
+            downDC_task(DCstatus); 
             int STstatus = 2;
-            topStepper_task(STstatus);//走22cm 
+            topStepper_task(STstatus);
             flywheel_task(2);
         }
-        else if(status == 3 and a > 3000)
-        {
+        else if(status == 3 and duration > 3000)
+        {   
             int DCstatus = 1;
-            downDC_task(DCstatus); // stop
+            downDC_task(DCstatus); 
             flywheel_task(1);
             Serial.println(message);
             status = 0;
@@ -383,61 +551,205 @@ void throwing_basketball_test(int& time , int& status)
     }
     else if(time == 2 )
     {
-        if(status == 1 and a < 5000)
+        if(status == 1 and duration < 3000)
         {
             flywheel_task(2); 
         }
-        else if(status == 1 and a > 5000)
+        else if(status == 1 and duration > 3000)
         {
             status = 2;
             start_time = millis();
         }
-        else if(status == 2) 
+        else if(status == 2 and duration < 5300 ) 
         {
-            for(int i=0;i < 4000;i++)
-            {
-                flywheel_task(2);
-                int STstatus = 2;
-                topStepper_task(STstatus);//走22cm 
-                int DCstatus = 2;
-                downDC_task(DCstatus); // stop
-            }
-            flywheel_task(1);
+            //downDC , topStepper , flywheel be activated at the same time 
+            int DCstatus = 2;
+            downDC_task(DCstatus); 
+            int STstatus = 2;
+            topStepper_task(STstatus);
+            flywheel_task(2);
+        }
+        else if(status == 2 and duration > 5300)
+        {
             int STstatus = 1;
             topStepper_task(STstatus);
+            int DCstatus = 1;
+            downDC_task(DCstatus); 
+            flywheel_task(1);
+            Serial.println(message);
             status = 0;
-            Serial.println(message);  
         }
     }
     else if(time == 3)
     {
-        if(status == 1 and a < 5000)
+        if(status == 1 and duration < 3000)
         {
-            flywheel_task(2);
+            flywheel_task(2); 
         }
-        else if(status == 1 and a > 5000)
+        else if(status == 1 and duration > 3000)
         {
             status = 2;
+            start_time = millis();
         }
-        else if(status == 2 )
+        else if(status == 2 and duration < 4500 ) //秒數待訂
         {
-            for(int i = 0 ; i < 3500 ; i++) //步數要重新測量
-            {
-                flywheel_task(2);
-                int DCstatus = 2;
-                downDC_task(DCstatus); // stop
-            }
-            delay(500);
-            flywheel_task(1);
+            //downDC , topStepper , flywheel be activated at the same time 
+            int DCstatus = 2;
+            downDC_task(DCstatus); 
+            int STstatus = 2;
+            topStepper_task(STstatus);
+            flywheel_task(2);
+        }
+        else if(status == 2 and duration > 4500)
+        {
             int STstatus = 1;
             topStepper_task(STstatus);
+            int DCstatus = 1;
+            downDC_task(DCstatus); 
+            flywheel_task(1);
+            Serial.println(message);
             status = 0;
-            time = 0;
-            // StandardPosi();    
-        } 
+
+            //this function will send the msg back to the python server , 
+            //therefore no needed of the serial.println()
+            delay(1000);
+            StandardPosi();  
+        }
     }
 }
 
+//throw basketball (throw one ball at a time)
+void throwing_basketball_Two_One(int& time , int& status)
+{
+    int duration = millis()-start_time ;
+    if(time == 1)
+    {
+        if(status == 1)
+        {
+            PusherUp();
+            delay(5000); 
+            PusherStop();
+            delay(200);
+            PusherDown(Pusher_status);
+            // delay(1440);
+            delay(800);
+            PusherStop();
+            status = 2;
+            start_time = millis();
+        }
+        else if(status == 2 and duration < 4000 ) 
+        {
+            flywheel_task(2);
+        }
+        else if(status == 2 and duration > 4000 )
+        {
+            status = 3;
+            start_time = millis();
+        }
+        else if(status == 3 and duration < 6900 )
+        {
+            //downDC , topStepper , flywheel be activated at the same time 
+            int Motstatus = 2;
+            downDC_task(Motstatus); 
+            topStepper_task(Motstatus);
+            flywheel_task(2);
+        }
+        else if(status == 3 and duration > 6900 )
+        {
+            int DCstatus = 1;
+            downDC_task(DCstatus); 
+            flywheel_task(1);
+            Serial.println(message);
+            status = 0;
+        }
+    }
+    else if(time == 2)
+    {
+        if(status ==1)
+        {
+            PusherUp();
+            delay(1000); 
+            PusherStop();
+            status = 2;
+        }
+        if(status == 2 and duration < 3000)
+        {
+            flywheel_task(2); 
+        }
+        else if(status == 2 and duration > 3000)
+        {
+            status = 3;
+            start_time = millis();
+        }
+        else if(status == 3 and duration < 3900 ) 
+        {
+            //downDC , topStepper , flywheel be activated at the same time 
+            int DCstatus = 2;
+            downDC_task(DCstatus); 
+            int STstatus = 2;
+            topStepper_task(STstatus);
+            flywheel_task(2);
+        }
+        else if(status == 3 and duration > 3900)
+        {
+            int STstatus = 1;
+            topStepper_task(STstatus);
+            int DCstatus = 1;
+            downDC_task(DCstatus); 
+            flywheel_task(1);
+            status = 0;
+            Serial.println(message);
+        }    
+    }
+    //中間有一次取球
+    else if(time == 3)
+    {
+        if(status == 1)
+        {
+            PusherUp();
+            delay(5000); 
+            PusherStop();
+            delay(200);
+            PusherDown(Pusher_status);
+            delay(1440);
+            PusherStop();
+            status = 2;
+            start_time = millis();
+        }
+        else if(status == 2 and duration < 4000 ) 
+        {
+            flywheel_task(2);
+        }
+        else if(status == 2 and duration > 4000 )
+        {
+            status = 3;
+            start_time = millis();
+        }
+        else if(status == 3 and duration < 12800 ) //從最底到最高
+        {
+            //downDC , topStepper , flywheel be activated at the same time 
+            int DCstatus = 2;
+            downDC_task(DCstatus); 
+            int STstatus = 2;
+            topStepper_task(STstatus);
+            flywheel_task(2);
+        }
+        else if(status == 3 and duration > 12800)
+        {
+            int DCstatus = 1;
+            downDC_task(DCstatus); 
+            flywheel_task(1);
+            status = 0;
+            time = 0;
+            // this function will send the msg back to the python server , 
+            // therefore no needed of the serial.println()
+            delay(1000);
+            StandardPosi();
+        }
+    }
+}
+
+//take bowling ball (take three balls in a row)
 void taking_bowling()
 {
     while (digitalRead(topbLimswit) == 1)
@@ -506,62 +818,10 @@ void taking_bowling()
     Serial.println(message);
 }
 
-void releasing_bowling(int& time) //rich在稿
-{
-    int status;
-    if(time == 1)
-    {
-        while(digitalRead(pusherLimswit) == 1)
-        {
-            PusherDown(Pusher_status); //down
-        }
-        PusherStop();
-        PusherUp();
-        delay(1000);
-        PusherStop();
-        // flywheel_task(2); 
-        delay(4000);  
-
-        for(int i=0;i < 4000;i++)
-        {
-            status = 2;
-            topStepper_task(status);//走22cm 
-        }
-
-        time = 2;
-        // flywheel_task(1);
-        Serial.println(message);
-    }
-    else if(time == 2)
-    {
-        // flywheel_task(2); 
-        for(int i=0;i < 4000;i++)
-        {
-            status = 2;
-            topStepper_task(status);//走22cm 
-        }
-        time = 3;
-        // flywheel_task(1);
-        Serial.println(message);       
-    }
-    else if(time == 3)
-    {
-        //上馬達gogo
-        status = 2;
-        // flywheel_task(2); 
-        for(int i = 0 ; i < 2000 ; i++)
-        {
-            topStepper_task(status);//走22cm 
-        }
-        delay(1000);
-        // flywheel_task(1);   //球全出去後飛輪停止、推桿下來
-        StandardPosi();    
-        time = 0;
-    }
-}
-
+//throw bowling ball (throw one ball at a time)
 void releasing_bowling_test(int& time , int& status)
 {
+    int duration = millis() - start_time;
     if(time == 1)
     {
         if(status == 1)
@@ -573,27 +833,27 @@ void releasing_bowling_test(int& time , int& status)
             PusherStop();
             delay(200);
             PusherUp(); //up
-            delay(2500);
+            delay(1300);
             PusherStop();
             status = 2;
             start_time = millis();
         }
-        else if(status == 2 and millis()-start_time < 2000 )
+        else if(status == 2 and duration < 3000 )
         {
             flywheel_task(2);
         }
-        else if(status == 2 and millis()-start_time > 2000 )
+        else if(status == 2 and duration > 3000 )
         {
             status = 3;
             start_time = millis();
         }
-        else if(status == 3 and millis()-start_time < 4200 )
+        else if(status == 3 and duration < 4200 )
         {
             int DCstatus = 2;
             downDC_task(DCstatus); //forward
             flywheel_task(2);
         }
-        else if(status == 3 and millis()-start_time > 4200)
+        else if(status == 3 and duration > 4200)
         {
             int DCstatus = 1;
             downDC_task(DCstatus); // stop
@@ -604,44 +864,44 @@ void releasing_bowling_test(int& time , int& status)
     }
     else if(time == 2 )
     {
-        if(status == 1 and millis()-start_time < 2000)
+        if(status == 1 and duration < 3000)
         {
             flywheel_task(2); 
         }
-        else if(status == 1 and millis()-start_time > 2000)
+        else if(status == 1 and duration > 3000)
         {
             status = 2;
             start_time = millis();
         }
-        else if(status == 2) 
+        else if(status == 2 and duration < 4200 )
         {
-            for(int i=0;i < 4000;i++)
-            {
-                flywheel_task(2);
-                int STstatus = 2;
-                topStepper_task(STstatus);//走22cm 
-            }
+            int DCstatus = 2;
+            downDC_task(DCstatus); //forward
+            flywheel_task(2);
+        }
+        else if(status == 2 and duration > 4200)
+        {
+            int DCstatus = 1;
+            downDC_task(DCstatus); // stop
             flywheel_task(1);
-            int STstatus = 1;
-            topStepper_task(STstatus);
+            Serial.println(message);
             status = 0;
-            Serial.println(message);  
         }
     }
     else if(time == 3)
     {
-        if(status == 1 and millis()-start_time < 2000)
+        if(status == 1 and duration < 2000)
         {
             flywheel_task(2);
         }
-        else if(status == 1 and millis()-start_time > 2000)
+        else if(status == 1 and duration > 2000)
         {
             status = 2;
             start_time = millis();
         }
         else if(status == 2 )
         {
-            for(int i = 0 ; i < 2000 ; i++) //步數要重新測量
+            for(int i = 0 ; i < 2000 ; i++) 
             {
                 flywheel_task(2);
                 int STstatus = 2;
@@ -652,7 +912,10 @@ void releasing_bowling_test(int& time , int& status)
             topStepper_task(STstatus);
             status = 0;
             time = 0;
-            StandardPosi();    
+
+            //this function will send the msg back to the python server , 
+            //therefore no needed of the serial.println()
+            // StandardPosi(); 
         } 
     }
 }
@@ -664,30 +927,25 @@ void action(String message)
     char motor_status = message[1];
     switch (motor_type)
     {
-        case '0': //standard position
+        case '0': 
             StandardPosi();
             break;
-        case '1': //take basketballs 
+        case '1': 
             takeBasket_times++;
-            takeBall(takeBasket_times);
+            takeBasket_Two_One(takeBasket_times);
+            // takeBasket_three(takeBasket_times);
             break;
-        case '2': //throwing basketball
+        case '2': 
             throwBasket_times++;
-            // throwing_basketball(throwBasket_times);
             throwBasket_status = 1;
             start_time = millis();
             break;
-        case '3':
-            takeBasket_times++;
-            takeBall(takeBasket_times);
-            takeBasket_times++;
-            takeBall(takeBasket_times);
-            takeBasket_times++;
-            takeBall(takeBasket_times);
+        case '3': 
+            takeBowling_times ++;
+            takeBowling_three(takeBowling_times);
             break;
         case '4':
             throwBowling_times++;
-            // releasing_bowling(throwBowling_times);   
             throwBowling_status = 1;
             start_time = millis();
         case '5': //上
@@ -705,13 +963,18 @@ void action(String message)
     }
 }
 
+// run every cycle in the void loop
 void motorMove()
 {
     topStepper_task(topStepper_status);
     downDC_task(downDC_status);
     Pusher_task(Pusher_status);
     flywheel_task(flywheel_status); 
-    throwing_basketball_test(throwBasket_times,throwBasket_status);
+
+    /* more than two motor need to be activated at the same , therefore we put the function here */
+    // throwing_basketball_three(throwBasket_times,throwBasket_status);
+    throwing_basketball_Two_One(throwBasket_times,throwBasket_status);
+
     releasing_bowling_test(throwBowling_times, throwBowling_status);
 }
 
