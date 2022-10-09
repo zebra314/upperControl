@@ -1,4 +1,4 @@
-/* This will be stored in the arduino board ,and receive the msg sended from the python server */
+    /* This will be stored in the arduino board ,and receive the msg sended from the python server */
 
 // topStepper
 const byte topStepper_CLK = 38; // step 
@@ -21,11 +21,14 @@ const byte rDCmotor_IN3 = 51; //brake
 const byte lDCmotor_IN1 = 24; //speed 
 const byte lDCmotor_IN2 = 26; //direction
 
-// limit switch 都接NO (觸發時為0)
+// limit switch 接NO (觸發時為0)
 const byte topbLimswit = 4; //上後
 const byte downbLimswit = 6; //下後
 const byte downfLimswit = 5; //下前
 const byte pusherLimswit = 7; //推桿
+
+//fly switch 接NO  
+const byte flySwitch = 22; //飛輪繼電器
 
 String message;
 int topStepper_status;
@@ -63,6 +66,7 @@ void setup()
     pinMode(downfLimswit, INPUT_PULLUP);
     pinMode(downbLimswit, INPUT_PULLUP);
     pinMode(pusherLimswit, INPUT_PULLUP);
+    pinMode(flySwitch, OUTPUT);
 }
 
 /* Programs about the motions of Stepper */
@@ -244,7 +248,8 @@ void downDC_task(int& status)
 void flywheel_task(int status) //flywheel
 {
     if (status == 1) // stop
-    {
+    {   
+        digitalWrite(flySwitch, LOW);
         digitalWrite(rDCmotor_IN1, 0);
         digitalWrite(rDCmotor_IN2, LOW);
         digitalWrite(rDCmotor_IN3, HIGH);
@@ -253,6 +258,7 @@ void flywheel_task(int status) //flywheel
     }
     else if (status == 2) // 噴
     {
+        digitalWrite(flySwitch, HIGH);
         digitalWrite(rDCmotor_IN1, speedIn);
         digitalWrite(rDCmotor_IN2, LOW);
         digitalWrite(lDCmotor_IN1, speedIn);
@@ -352,7 +358,7 @@ void StandardPosi()
 }
 
 //take basketball (take one ball at a time)
-void takeBasket_Two_One(int& time) 
+void takeBasket_three(int& time) 
 {
     if(time == 1)
     {
@@ -406,18 +412,9 @@ void takeBasket_Two_One(int& time)
         delay(4500);
         PusherStop();
         Serial.println(message);
-
-        // let the camera to face the text board
-        delay(3000);
-        PusherUp();
-        delay(3000);
-        PusherStop();
     }
     else if(time ==3)
     {
-        PusherUp(); //up
-        delay(3000);
-        PusherStop(); //stop
         while(digitalRead(pusherLimswit) == 1)
         {
             PusherDown(Pusher_status); //down
@@ -429,131 +426,14 @@ void takeBasket_Two_One(int& time)
         PusherStop();
         Serial.println(message);
         time = 0;
-    }
-}
 
-// placed in the Motormove function to run every time in the void loop
-// take one ball at a time
-void takeBasket_Two_One_multi(int& time , int& status) 
-{
-    int duration = millis()-start_time ;
-    if(time == 1)
-    {
-        if(status == 1 and duration < 3000)
-        {
-            Pusher_status = 3;
-        }
-        else if(status == 1 and duration > 3000)
-        {
-            status = 2;
-            downDC_status = 3;
-            start_time = millis();
-        }
-        else if(status == 2 and duration < 2750 )
-        {
-            Pusher_status = 3;
-            status = 3;
-        }
-        else if(status == 3 and duration > 2750 )
-        {
-            Pusher_status = 1;
-            status = 4;
-            start_time = millis();
-        }
-        else if( status == 4 and duration < 2500 and Pusher_status != 1)
-        {
-            Pusher_status = 2; //down
-        }
-        else if( status == 4 and duration > 2500 and Pusher_status == 1)
-        {
-            status = 5;
-        }
-        else if (status == 5)
-        {
-            delay(2500);
-            PusherUp(); //up
-            delay(3500);
-            PusherStop();
-            Serial.println(message);
-            status = 0;
-        }
-
-        /*
-        if(status == 1 )
-        {
-            PusherUp(); //up
-            delay(3500);
-            status = 2;
-            downDC_status = 3;
-            start_time = millis();
-        }
-        else if(status == 2 and duration > 2250)
-        {
-            PusherStop();
-            status = 3;
-        }
-        else if(status == 3 and downDC_status == 3)
-        {
-            downDC_status = 3;
-        }
-        else if(status == 3 and downDC_status == 1)
-        {
-            status = 4;
-            Pusher_status = 2; //down
-        }
-        else if(status == 4 and Pusher_status == 2)
-        {
-            Pusher_status = 2; //down
-        }
-        else if(status == 4 and Pusher_status == 1)
-        {
-            delay(2500);
-            PusherUp(); //up
-            delay(3500);
-            PusherStop();
-            Serial.println(message);
-            status = 0;
-        }*/
-    } 
-    else if(time == 2 and status == 1)
-    {
+        delay(3000);
         while(digitalRead(pusherLimswit) == 1)
         {
             PusherDown(Pusher_status); //down
         }
         PusherStop();
-        delay(3000);
-        PusherUp(); //up
-        delay(4500);
-        PusherStop();
-        Serial.println(message);
-
-        // let the camera to face the text board
-        delay(3000);
-        PusherUp();
-        delay(3000);
-        PusherStop();
-        status = 0;
-        time = 0;
     }
-    /*
-    else if(time ==3)
-    {
-        PusherUp(); //up
-        delay(3000);
-        PusherStop(); //stop
-        while(digitalRead(pusherLimswit) == 1)
-        {
-            PusherDown(Pusher_status); //down
-        }
-        PusherStop();
-        delay(300);
-        PusherUp(); //up
-        delay(4500);
-        PusherStop();
-        Serial.println(message);
-        time = 0;
-    }*/
 }
 
 //throw basketball (throw one ball at a time)
@@ -588,7 +468,7 @@ void throwing_basketball_Two_One(int& time , int& status)
         {
             //downDC , topStepper , flywheel be activated at the same time 
             int Motstatus = 2;
-            downDC_task(Motstatus); 
+            downDC_forward_fast(Motstatus); 
             topStepper_task(Motstatus);
             flywheel_task(2);
         }
@@ -794,7 +674,7 @@ void releasing_bowling_without_fly(int& time , int& status)
                 PusherDown(Pusher_status); //down
             }
             PusherStop();
-            delay(200);
+            delay(150);
             while(digitalRead(pusherLimswit) == 0)
             {
                 PusherUp_slow(); //down
@@ -907,7 +787,10 @@ void action(String message)
             break;
         case '1': 
             takeBasket_times++;
-            takeBasket_Two_One(takeBasket_times);
+            takeBasket_three(takeBasket_times);
+            // takeBasket_Two_One(takeBasket_times);
+
+            // optimize take basket
             // takeBasket_status = 1;
             // start_time = millis();
             break;
@@ -971,7 +854,7 @@ void loop()
 
 /*
 //take basketball (take one ball at a time)
-void takeBasket_three(int& time) 
+void takeBasket_Two_One(int& time) 
 {
     if(time == 1)
     {
@@ -980,22 +863,18 @@ void takeBasket_three(int& time)
         PusherStop(); //stop
         while(digitalRead(downbLimswit) == 1)
         {
-            //backward
-            digitalWrite(downDC_IN1, LOW);
-            digitalWrite(downDC_IN2, HIGH);
-            analogWrite(downDC_ENA, 150);
-        }
-        while(digitalRead(downbLimswit) == 1)
-        {
-            //backward
-            digitalWrite(downDC_IN1, LOW);
-            digitalWrite(downDC_IN2, HIGH);
-            analogWrite(downDC_ENA, 150);
+            while(digitalRead(downbLimswit) == 1)
+            {
+                //backward
+                digitalWrite(downDC_IN1, LOW);
+                digitalWrite(downDC_IN2, HIGH);
+                analogWrite(downDC_ENA, 150);
+            }
         }
         digitalWrite(downDC_IN1, LOW);
         digitalWrite(downDC_IN2, LOW);
         analogWrite(downDC_ENA, 0);
-        delay(300);
+        delay(250);
         while(digitalRead(downbLimswit) == 0)
         {
             //forward
@@ -1011,9 +890,9 @@ void takeBasket_three(int& time)
             PusherDown(Pusher_status); //down
         }
         PusherStop();
-        delay(2500);
+        delay(2000);
         PusherUp(); //up
-        delay(5500);
+        delay(3500);
         PusherStop();
         Serial.println(message);
     } 
@@ -1024,15 +903,23 @@ void takeBasket_three(int& time)
             PusherDown(Pusher_status); //down
         }
         PusherStop();
-        delay(3000);
+        delay(1500);
         PusherUp(); //up
-        delay(3000);
+        delay(4500);
         PusherStop();
         Serial.println(message);
-      
+
+        // let the camera to face the text board
+        delay(3000);
+        PusherUp();
+        delay(3000);
+        PusherStop();
     }
     else if(time ==3)
     {
+        PusherUp(); //up
+        delay(3000);
+        PusherStop(); //stop
         while(digitalRead(pusherLimswit) == 1)
         {
             PusherDown(Pusher_status); //down
