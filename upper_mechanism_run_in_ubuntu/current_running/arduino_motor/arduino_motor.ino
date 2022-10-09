@@ -91,7 +91,7 @@ void topStepper_backward(int& status)
     else if (digitalRead(topbLimswit) == 0)
     {
 
-        delay(400);
+        delay(300);
         while(digitalRead(topbLimswit) == 0)
         {
             // forward
@@ -130,7 +130,7 @@ void downDC_forward(int& status)
         digitalWrite(downDC_IN1, LOW);
         digitalWrite(downDC_IN2, LOW);
         analogWrite(downDC_ENA, 0);
-        delay(400);
+        delay(250);
         while(digitalRead(downfLimswit) == 0)
         {
             //backward
@@ -156,7 +156,7 @@ void downDC_forward_fast(int& status)
         digitalWrite(downDC_IN1, LOW);
         digitalWrite(downDC_IN2, LOW);
         analogWrite(downDC_ENA, 0);
-        delay(400);
+        delay(100);
         while(digitalRead(downfLimswit) == 0)
         {
             //backward
@@ -182,7 +182,7 @@ void downDC_backward(int& status)
         digitalWrite(downDC_IN1, LOW);
         digitalWrite(downDC_IN2, LOW);
         analogWrite(downDC_ENA, 0);
-        delay(400);
+        delay(250);
         while(digitalRead(downbLimswit) == 0)
         {
             //forward
@@ -222,7 +222,7 @@ void flywheel_task(int status) //flywheel
     {
         digitalWrite(rDCmotor_IN1, 0);
         digitalWrite(rDCmotor_IN2, LOW);
-        digitalWrite(rDCmotor_IN3, LOW);
+        digitalWrite(rDCmotor_IN3, HIGH);
         digitalWrite(lDCmotor_IN1, 0);
         digitalWrite(lDCmotor_IN2, LOW);
     }
@@ -265,7 +265,7 @@ void PusherDown(int& status)
     else if(digitalRead(pusherLimswit) == 0)
     {
         PusherStop();
-        delay(400);
+        delay(250);
         while(digitalRead(pusherLimswit) == 0)
         {
             PusherUp();
@@ -284,7 +284,7 @@ void PusherDown_slow(int& status)
     else if(digitalRead(pusherLimswit) == 0)
     {
         PusherStop();
-        delay(400);
+        delay(250);
         while(digitalRead(pusherLimswit) == 0)
         {
             PusherUp();
@@ -336,22 +336,18 @@ void takeBasket_Two_One(int& time)
         PusherStop(); //stop
         while(digitalRead(downbLimswit) == 1)
         {
-            //backward
-            digitalWrite(downDC_IN1, LOW);
-            digitalWrite(downDC_IN2, HIGH);
-            analogWrite(downDC_ENA, 150);
-        }
-        while(digitalRead(downbLimswit) == 1)
-        {
-            //backward
-            digitalWrite(downDC_IN1, LOW);
-            digitalWrite(downDC_IN2, HIGH);
-            analogWrite(downDC_ENA, 150);
+            while(digitalRead(downbLimswit) == 1)
+            {
+                //backward
+                digitalWrite(downDC_IN1, LOW);
+                digitalWrite(downDC_IN2, HIGH);
+                analogWrite(downDC_ENA, 150);
+            }
         }
         digitalWrite(downDC_IN1, LOW);
         digitalWrite(downDC_IN2, LOW);
         analogWrite(downDC_ENA, 0);
-        delay(300);
+        delay(250);
         while(digitalRead(downbLimswit) == 0)
         {
             //forward
@@ -369,7 +365,7 @@ void takeBasket_Two_One(int& time)
         PusherStop();
         delay(2500);
         PusherUp(); //up
-        delay(5500);
+        delay(3500);
         PusherStop();
         Serial.println(message);
     } 
@@ -385,7 +381,10 @@ void takeBasket_Two_One(int& time)
         delay(4500);
         PusherStop();
         Serial.println(message);
-
+        delay(3000);
+        PusherStop();
+        delay(3000);
+        PusherStop();
     }
     else if(time ==3)
     {
@@ -469,7 +468,7 @@ void throwing_basketball_Two_One(int& time , int& status)
             status = 3;
             start_time = millis();
         }
-        else if(status == 3 and duration < 3900 ) 
+        else if(status == 3 and duration < 3250 ) 
         {
             //downDC , topStepper , flywheel be activated at the same time 
             int DCstatus = 2;
@@ -478,7 +477,7 @@ void throwing_basketball_Two_One(int& time , int& status)
             topStepper_task(STstatus);
             flywheel_task(2);
         }
-        else if(status == 3 and duration > 3900)
+        else if(status == 3 and duration > 3250)
         {
             int STstatus = 1;
             topStepper_task(STstatus);
@@ -499,23 +498,27 @@ void throwing_basketball_Two_One(int& time , int& status)
             PusherUp();
             delay(5000); 
             PusherStop();
-            delay(200);
-            PusherDown(Pusher_status);
-            delay(1440);
-            PusherStop();
+            // delay(200);
+            // PusherDown(Pusher_status);
+            // delay(1440);
+            // PusherStop();
             status = 2;
             start_time = millis();
         }
         else if(status == 2 and duration < 4000 ) 
         {
             flywheel_task(2);
+            int DCstatus = 2;
+            downDC_task(DCstatus); 
+            int STstatus = 2;
+            topStepper_task(STstatus);
         }
         else if(status == 2 and duration > 4000 )
         {
             status = 3;
             start_time = millis();
         }
-        else if(status == 3 and duration < 12800 ) //從最底到最高
+        else if(status == 3 and duration < 7000 ) //從最底到最高
         {
             //downDC , topStepper , flywheel be activated at the same time 
             int DCstatus = 2;
@@ -524,7 +527,7 @@ void throwing_basketball_Two_One(int& time , int& status)
             topStepper_task(STstatus);
             flywheel_task(2);
         }
-        else if(status == 3 and duration > 12800)
+        else if(status == 3 and duration > 7000)
         {
             int DCstatus = 1;
             downDC_task(DCstatus); 
@@ -565,7 +568,7 @@ void takeBowling_three(int& time)
         digitalWrite(downDC_IN1, LOW);
         digitalWrite(downDC_IN2, LOW);
         analogWrite(downDC_ENA, 0);
-        delay(300);
+        delay(200);
         while(digitalRead(downbLimswit) == 0)
         {
             //forward
@@ -793,6 +796,7 @@ void motorMove()
     flywheel_task(flywheel_status); 
 
     /* more than two motor need to be activated at the same , therefore we put the function here */
+
     // throwing_basketball_three(throwBasket_times,throwBasket_status);
     throwing_basketball_Two_One(throwBasket_times,throwBasket_status);
 
