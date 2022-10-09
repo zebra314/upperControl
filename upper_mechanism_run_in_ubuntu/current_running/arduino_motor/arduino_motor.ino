@@ -599,7 +599,6 @@ void takeBowling_three(int& time)
         delay(3000);
         PusherStop();
         Serial.println(message);
-      
     }
     else if(time ==3)
     {
@@ -614,6 +613,17 @@ void takeBowling_three(int& time)
         PusherStop();
         Serial.println(message);
         time = 0;
+
+        //過三秒 回復水平
+        delay(3000);
+        while(digitalRead(pusherLimswit) == 1)
+        {
+            PusherDown(Pusher_status); //down
+        }
+        PusherStop();
+        PusherUp_slow(); //up
+        delay(1300); //水平
+        PusherStop();
     }
 }
 
@@ -639,12 +649,12 @@ void releasing_bowling_without_fly(int& time , int& status)
             status = 2;
             start_time = millis();
         }
-        else if(status == 2 and duration < 3000 )
+        else if(status == 2 and duration < 5000 )
         {
             int Motstatus = 2;
             topStepper_task(Motstatus);
         }
-        else if(status == 2 and duration > 3000 )
+        else if(status == 2 and duration > 5000 )
         {
             status = 3;
             start_time = millis();
@@ -686,13 +696,13 @@ void releasing_bowling_without_fly(int& time , int& status)
         }
         else if(status == 2 and duration < 5000 )
         {
-            int STstatus = 2;
-            topStepper_task(STstatus); //forward
+            int Motstatus = 2;
+            downDC_forward_fast(Motstatus); //forward
         }
         else if(status == 2 and duration > 5000 )
         {
-            int STstatus = 1;
-            topStepper_task(STstatus); //forward
+            int Motstatus = 1;
+            downDC_forward_fast(Motstatus); //forward
             Serial.println(message);
             status = 0;
         }
@@ -719,133 +729,15 @@ void releasing_bowling_without_fly(int& time , int& status)
             PusherStop();
             status = 2;
             start_time = millis();
-        }else if(status == 2 and duration < 4000 )
+        }else if(status == 2 and duration < 2000 )
         {
-            
             flywheel_task(2);
-        }else if(status == 2 and duration > 4000 )
+        }else if(status == 2 and duration > 2000 )
         {
             flywheel_task(1);
             time = 0;
             status = 0;
         }   
-        /*else if(status == 2 and duration < 4000 )
-        {
-            int Motstatus = 2;
-            downDC_task(Motstatus); //forward
-            topStepper_task(Motstatus);
-            //flywheeltask(2);
-        }   
-        else if(status == 2 and duration > 4000 )
-        {
-            int Motstatus = 1;
-            downDC_task(Motstatus); //forward
-            topStepper_task(Motstatus);
-            //flywheeltask(1)
-            time = 0;
-            status = 0;
-        }*/
-    }
-}
-
-
-//throw bowling ball (throw one ball at a time)
-void releasing_bowling_three(int& time , int& status)
-{
-    int duration = millis() - start_time;
-    if(time == 1)
-    {
-        if(status == 1)
-        {
-            while(digitalRead(pusherLimswit) == 1)
-            {
-                PusherDown(Pusher_status); //down
-            }
-            PusherStop();
-            delay(200);
-            PusherUp(); //up
-            delay(1300);
-            PusherStop();
-            status = 2;
-            start_time = millis();
-        }
-        else if(status == 2 and duration < 3000 )
-        {
-            flywheel_task(2);
-        }
-        else if(status == 2 and duration > 3000 )
-        {
-            status = 3;
-            start_time = millis();
-        }
-        else if(status == 3 and duration < 5000 )
-        {
-            int Motstatus = 2;
-            downDC_task(Motstatus); //forward
-            topStepper_task(Motstatus);
-            flywheel_task(2);
-        }
-        else if(status == 3 and duration > 5000)
-        {
-            int DCstatus = 1;
-            downDC_task(DCstatus); // stop
-            flywheel_task(1);
-            Serial.println(message);
-            status = 0;
-        }
-    }
-    else if(time == 2 )
-    {
-        if(status == 1 and duration < 3000)
-        {
-            flywheel_task(2); 
-        }
-        else if(status == 1 and duration > 3000)
-        {
-            status = 2;
-            start_time = millis();
-        }
-        else if(status == 2 and duration < 5000 )
-        {
-            int DCstatus = 2;
-            downDC_task(DCstatus); //forward
-            flywheel_task(2);
-        }
-        else if(status == 2 and duration > 5000)
-        {
-            int DCstatus = 1;
-            downDC_task(DCstatus); // stop
-            flywheel_task(1);
-            Serial.println(message);
-            status = 0;
-        }
-    }
-    else if(time == 3)
-    {
-        if(status == 1 and duration < 2000)
-        {
-            flywheel_task(2);
-        }
-        else if(status == 1 and duration > 2000)
-        {
-            status = 2;
-            start_time = millis();
-        }
-        else if(status == 2 )
-        {
-            for(int i = 0 ; i < 2000 ; i++) 
-            {
-                flywheel_task(2);
-                int STstatus = 2;
-                topStepper_task(STstatus);//走22cm 
-            }
-            flywheel_task(1);
-            int STstatus = 1;
-            topStepper_task(STstatus);
-            status = 0;
-            time = 0;
-            StandardPosi(); 
-        } 
     }
 }
 
@@ -1107,6 +999,106 @@ void throwing_basketball_three(int& time , int& status)
             delay(1000);
             StandardPosi();  
         }
+    }
+}
+
+//throw bowling ball (throw one ball at a time)
+void releasing_bowling_three(int& time , int& status)
+{
+    int duration = millis() - start_time;
+    if(time == 1)
+    {
+        if(status == 1)
+        {
+            while(digitalRead(pusherLimswit) == 1)
+            {
+                PusherDown(Pusher_status); //down
+            }
+            PusherStop();
+            delay(200);
+            PusherUp(); //up
+            delay(1300);
+            PusherStop();
+            status = 2;
+            start_time = millis();
+        }
+        else if(status == 2 and duration < 3000 )
+        {
+            flywheel_task(2);
+        }
+        else if(status == 2 and duration > 3000 )
+        {
+            status = 3;
+            start_time = millis();
+        }
+        else if(status == 3 and duration < 5000 )
+        {
+            int Motstatus = 2;
+            downDC_task(Motstatus); //forward
+            topStepper_task(Motstatus);
+            flywheel_task(2);
+        }
+        else if(status == 3 and duration > 5000)
+        {
+            int DCstatus = 1;
+            downDC_task(DCstatus); // stop
+            flywheel_task(1);
+            Serial.println(message);
+            status = 0;
+        }
+    }
+    else if(time == 2 )
+    {
+        if(status == 1 and duration < 3000)
+        {
+            flywheel_task(2); 
+        }
+        else if(status == 1 and duration > 3000)
+        {
+            status = 2;
+            start_time = millis();
+        }
+        else if(status == 2 and duration < 5000 )
+        {
+            int DCstatus = 2;
+            downDC_task(DCstatus); //forward
+            flywheel_task(2);
+        }
+        else if(status == 2 and duration > 5000)
+        {
+            int DCstatus = 1;
+            downDC_task(DCstatus); // stop
+            flywheel_task(1);
+            Serial.println(message);
+            status = 0;
+        }
+    }
+    else if(time == 3)
+    {
+        if(status == 1 and duration < 2000)
+        {
+            flywheel_task(2);
+        }
+        else if(status == 1 and duration > 2000)
+        {
+            status = 2;
+            start_time = millis();
+        }
+        else if(status == 2 )
+        {
+            for(int i = 0 ; i < 2000 ; i++) 
+            {
+                flywheel_task(2);
+                int STstatus = 2;
+                topStepper_task(STstatus);//走22cm 
+            }
+            flywheel_task(1);
+            int STstatus = 1;
+            topStepper_task(STstatus);
+            status = 0;
+            time = 0;
+            StandardPosi(); 
+        } 
     }
 }
 */
