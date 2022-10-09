@@ -54,7 +54,6 @@ if __name__ == '__main__':
     # connect to arduino board
     ser = serial.Serial('/dev/ttyUSB0',57600)
     ser.timeout = 3
-    sleep(3)
     print('arduino connected')
 
     while True:
