@@ -33,6 +33,7 @@ int downDC_status;
 int Pusher_status;
 int flywheel_status;
 
+int takeBasket_status = 0;
 int throwBasket_status = 0; 
 int throwBowling_status = 0;
 
@@ -193,7 +194,31 @@ void downDC_backward(int& status)
         status = 1;
     }
 }
-
+void downDC_backward_fast(int& status)
+{
+    if(digitalRead(downbLimswit) == 1)
+    {
+        //backward
+        digitalWrite(downDC_IN1, LOW);
+        digitalWrite(downDC_IN2, HIGH);
+        analogWrite(downDC_ENA, 200);
+    }
+    else if (digitalRead(downbLimswit) == 0)
+    {
+        digitalWrite(downDC_IN1, LOW);
+        digitalWrite(downDC_IN2, LOW);
+        analogWrite(downDC_ENA, 0);
+        delay(200);
+        while(digitalRead(downbLimswit) == 0)
+        {
+            //forward
+            digitalWrite(downDC_IN1, HIGH);
+            digitalWrite(downDC_IN2, LOW);
+            analogWrite(downDC_ENA, 200);
+        }
+        status = 1;
+    }
+}
 void downDC_task(int& status) 
 {
     if (status == 1)
@@ -363,7 +388,7 @@ void takeBasket_Two_One(int& time)
             PusherDown(Pusher_status); //down
         }
         PusherStop();
-        delay(2500);
+        delay(2000);
         PusherUp(); //up
         delay(3500);
         PusherStop();
@@ -376,13 +401,15 @@ void takeBasket_Two_One(int& time)
             PusherDown(Pusher_status); //down
         }
         PusherStop();
-        delay(3000);
+        delay(1500);
         PusherUp(); //up
         delay(4500);
         PusherStop();
         Serial.println(message);
+
+        // let the camera to face the text board
         delay(3000);
-        PusherStop();
+        PusherUp();
         delay(3000);
         PusherStop();
     }
@@ -405,6 +432,130 @@ void takeBasket_Two_One(int& time)
     }
 }
 
+// placed in the Motormove function to run every time in the void loop
+// take one ball at a time
+void takeBasket_Two_One_multi(int& time , int& status) 
+{
+    int duration = millis()-start_time ;
+    if(time == 1)
+    {
+        if(status == 1 and duration < 3000)
+        {
+            Pusher_status = 3;
+        }
+        else if(status == 1 and duration > 3000)
+        {
+            status = 2;
+            downDC_status = 3;
+            start_time = millis();
+        }
+        else if(status == 2 and duration < 2750 )
+        {
+            Pusher_status = 3;
+            status = 3;
+        }
+        else if(status == 3 and duration > 2750 )
+        {
+            Pusher_status = 1;
+            status = 4;
+            start_time = millis();
+        }
+        else if( status == 4 and duration < 2500 and Pusher_status != 1)
+        {
+            Pusher_status = 2; //down
+        }
+        else if( status == 4 and duration > 2500 and Pusher_status == 1)
+        {
+            status = 5;
+        }
+        else if (status == 5)
+        {
+            delay(2500);
+            PusherUp(); //up
+            delay(3500);
+            PusherStop();
+            Serial.println(message);
+            status = 0;
+        }
+
+        /*
+        if(status == 1 )
+        {
+            PusherUp(); //up
+            delay(3500);
+            status = 2;
+            downDC_status = 3;
+            start_time = millis();
+        }
+        else if(status == 2 and duration > 2250)
+        {
+            PusherStop();
+            status = 3;
+        }
+        else if(status == 3 and downDC_status == 3)
+        {
+            downDC_status = 3;
+        }
+        else if(status == 3 and downDC_status == 1)
+        {
+            status = 4;
+            Pusher_status = 2; //down
+        }
+        else if(status == 4 and Pusher_status == 2)
+        {
+            Pusher_status = 2; //down
+        }
+        else if(status == 4 and Pusher_status == 1)
+        {
+            delay(2500);
+            PusherUp(); //up
+            delay(3500);
+            PusherStop();
+            Serial.println(message);
+            status = 0;
+        }*/
+    } 
+    else if(time == 2 and status == 1)
+    {
+        while(digitalRead(pusherLimswit) == 1)
+        {
+            PusherDown(Pusher_status); //down
+        }
+        PusherStop();
+        delay(3000);
+        PusherUp(); //up
+        delay(4500);
+        PusherStop();
+        Serial.println(message);
+
+        // let the camera to face the text board
+        delay(3000);
+        PusherUp();
+        delay(3000);
+        PusherStop();
+        status = 0;
+        time = 0;
+    }
+    /*
+    else if(time ==3)
+    {
+        PusherUp(); //up
+        delay(3000);
+        PusherStop(); //stop
+        while(digitalRead(pusherLimswit) == 1)
+        {
+            PusherDown(Pusher_status); //down
+        }
+        PusherStop();
+        delay(300);
+        PusherUp(); //up
+        delay(4500);
+        PusherStop();
+        Serial.println(message);
+        time = 0;
+    }*/
+}
+
 //throw basketball (throw one ball at a time)
 void throwing_basketball_Two_One(int& time , int& status)
 {
@@ -414,7 +565,7 @@ void throwing_basketball_Two_One(int& time , int& status)
         if(status == 1)
         {
             PusherUp();
-            delay(5000); 
+            delay(2000); 
             PusherStop();
             delay(200);
             PusherDown(Pusher_status);
@@ -617,7 +768,7 @@ void takeBowling_three(int& time)
         Serial.println(message);
         time = 0;
 
-        //過三秒 回復水平
+        //to make camera able to face the card board
         delay(3000);
         while(digitalRead(pusherLimswit) == 1)
         {
@@ -757,7 +908,8 @@ void action(String message)
         case '1': 
             takeBasket_times++;
             takeBasket_Two_One(takeBasket_times);
-            // takeBasket_three(takeBasket_times);
+            // takeBasket_status = 1;
+            // start_time = millis();
             break;
         case '2': 
             throwBasket_times++;
@@ -790,6 +942,7 @@ void action(String message)
 // run every cycle in the void loop
 void motorMove()
 {
+    /* control the motor by changing the status */
     topStepper_task(topStepper_status);
     downDC_task(downDC_status);
     Pusher_task(Pusher_status);
@@ -797,11 +950,13 @@ void motorMove()
 
     /* more than two motor need to be activated at the same , therefore we put the function here */
 
-    // throwing_basketball_three(throwBasket_times,throwBasket_status);
-    throwing_basketball_Two_One(throwBasket_times,throwBasket_status);
+    // takeBasket_Two_One_multi(takeBasket_times,takeBasket_status); 
 
-    // releasing_bowling_three(throwBowling_times, throwBowling_status);
+    throwing_basketball_Two_One(throwBasket_times,throwBasket_status);
+    // throwing_basketball_three(throwBasket_times,throwBasket_status);
+
     releasing_bowling_without_fly(throwBowling_times, throwBowling_status);
+    // releasing_bowling_three(throwBowling_times, throwBowling_status);
 }
 
 void loop()
