@@ -669,15 +669,22 @@ void releasing_bowling_without_fly(int& time , int& status)
     {
         if(status == 1)
         {
-            PusherUp();
+            PusherUp();            
+            Motstatus = 2;
+            downDC_forward(Motstatus); //forward
             delay(2000);
             PusherStop();
+            Motstatus = 1;
+            downDC_task(Motstatus); 
+
+            delay(400);
+
             start_time = millis() ;
             while(digitalRead(pusherLimswit) == 1)
             { 
                 duration = millis() - start_time;
                 PusherDown_slow(Pusher_status); //down
-                if( duration > 1300)
+                if( duration > 1600)
                 {
                     flywheel_task(1);
                 }
@@ -695,25 +702,14 @@ void releasing_bowling_without_fly(int& time , int& status)
             status = 2;
             start_time = millis();
         }
-        else if(status == 2 and duration < 5000 )
+        else if(status == 2 and duration < 4000 )
         {
             Motstatus = 2;
             topStepper_task(Motstatus);
         }
-        else if(status == 2 and duration > 5000 )
+        else if(status == 2 and duration > 4000 )
         {
-            status = 3;
-            start_time = millis();
-        }
-        else if(status == 3 and duration < 3000)
-        {
-            Motstatus = 2;
-            downDC_task(Motstatus); //forward
-        }
-        else if(status ==3 and duration > 3000)
-        {
-            Motstatus = 1;
-            downDC_task(Motstatus); //forward
+            topStepper_task(Motstatus);
             Serial.println(message);
             status = 0;
         }
@@ -725,7 +721,9 @@ void releasing_bowling_without_fly(int& time , int& status)
             PusherUp();
             delay(1500);
             PusherStop();
-            delay(200);
+
+            delay(400);
+
             while(digitalRead(pusherLimswit) == 1)
             {
                 flywheel_task(2);
@@ -733,40 +731,26 @@ void releasing_bowling_without_fly(int& time , int& status)
             }
             flywheel_task(1);
             PusherStop();
-            delay(200);
-            while(digitalRead(pusherLimswit) == 0)
-            {
-                PusherUp_slow(); 
-            }
+            delay(100);
+            PusherUp_fast(); //down
+            Motstatus = 2 ;
+            downDC_forward(Motstatus); 
+            delay(830);
             PusherStop();
             status = 2;
+            Motstatus = 1 ;
+            downDC_task(Motstatus);
             start_time = millis();
         }
-        else if(status == 2 and duration < 5000 )
+        else if(status == 2 and duration < 3000)
         {
-            int Motstatus = 2;
-            downDC_forward_fast(Motstatus); //forward
-            if(digitalRead(downfLimswit) == 0)
-            {
-                int DCstatus = 1;
-                downDC_task(DCstatus);
-                delay(200);
-                while(digitalRead(downfLimswit) == 0)
-                {
-                    int DCstatus = 3;
-                    downDC_backward(DCstatus);
-                }
-                downDC_task(DCstatus);
-                Serial.println(message);
-                status = 0;
-            }
+            Motstatus = 2;
+            topStepper_task(Motstatus);
         }
-        else if(status == 2 and duration > 5000 )
+        else if(status == 2 and duration > 3000)
         {
-            int Motstatus = 1;
-            downDC_task(Motstatus); //forward
             Serial.println(message);
-            status = 0;
+            status = 0; 
         }
     }
     else if(time == 3)
@@ -776,7 +760,7 @@ void releasing_bowling_without_fly(int& time , int& status)
             PusherUp();
             delay(1500);
             PusherStop();
-            delay(200);
+            delay(400);
             while(digitalRead(pusherLimswit) == 1)
             {
                 flywheel_task(2);
