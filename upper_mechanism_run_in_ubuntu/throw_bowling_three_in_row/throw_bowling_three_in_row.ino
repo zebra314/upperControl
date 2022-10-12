@@ -284,13 +284,18 @@ void PusherUp_slow()
     digitalWrite(Pusher_IN2, LOW);
     analogWrite(Pusher_ENA, 90);
 }
-void PusherDown(int& status)
+void PusherDown(int speed)
+{
+    digitalWrite(Pusher_IN1, LOW);
+    digitalWrite(Pusher_IN2, HIGH);
+    analogWrite(Pusher_ENA, speed);
+}
+
+void PusherDown_task(int& status)
 {
     if(digitalRead(pusherLimswit) == 1)
     {
-        digitalWrite(Pusher_IN1, LOW);
-        digitalWrite(Pusher_IN2, HIGH);
-        analogWrite(Pusher_ENA, 150);
+        PusherDown(150);
     }
     else if(digitalRead(pusherLimswit) == 0)
     {
@@ -307,9 +312,7 @@ void PusherDown_slow(int& status)
 {
     if(digitalRead(pusherLimswit) == 1)
     {
-        digitalWrite(Pusher_IN1, LOW);
-        digitalWrite(Pusher_IN2, HIGH);
-        analogWrite(Pusher_ENA, 100);
+        PusherDown(100);
     }
     else if(digitalRead(pusherLimswit) == 0)
     {
@@ -326,9 +329,7 @@ void PusherDown_fast(int& status)
 {
     if(digitalRead(pusherLimswit) == 1)
     {
-        digitalWrite(Pusher_IN1, LOW);
-        digitalWrite(Pusher_IN2, HIGH);
-        analogWrite(Pusher_ENA, 250);
+        PusherDown(250);
     }
     else if(digitalRead(pusherLimswit) == 0)
     {
@@ -357,7 +358,7 @@ void Pusher_task(int& status)
     }
     else if (status == 2) //縮短
     {
-        PusherDown(status);
+        PusherDown_task(status);
     }
     else if (status == 3) //伸長
     {
@@ -412,10 +413,7 @@ void StandardPosi()
     //pusher down
     while(digitalRead(pusherLimswit) == 1)
     {
-        //down
-        digitalWrite(Pusher_IN1, LOW);
-        digitalWrite(Pusher_IN2, HIGH);
-        analogWrite(Pusher_ENA, 150);
+        PusherDown(150);
     }
     delay(100);
     while(digitalRead(pusherLimswit) == 0)
@@ -429,7 +427,7 @@ void StandardPosi()
 }
 
 //take basketball (take one ball at a time)
-void takeBasket_three(int& time) 
+void takeBasket_three(int& time)
 {
     if(time == 1)
     {
@@ -462,7 +460,7 @@ void takeBasket_three(int& time)
         analogWrite(downDC_ENA, 0);
         while(digitalRead(pusherLimswit) == 1)
         {
-            PusherDown(Pusher_status); //down
+            PusherDown(150);
         }
         PusherStop();
         delay(2000);
@@ -475,7 +473,7 @@ void takeBasket_three(int& time)
     {
         while(digitalRead(pusherLimswit) == 1)
         {
-            PusherDown(Pusher_status); //down
+            PusherDown(150);
         }
         PusherStop();
         delay(1500);
@@ -488,7 +486,7 @@ void takeBasket_three(int& time)
     {
         while(digitalRead(pusherLimswit) == 1)
         {
-            PusherDown(Pusher_status); //down
+            PusherDown(150);
         }
         PusherStop();
         delay(300);
@@ -498,11 +496,16 @@ void takeBasket_three(int& time)
         Serial.println(message);
         time = 0;
 
+        //prepare for throwing the first basket
         delay(5000);
         while(digitalRead(pusherLimswit) == 1)
         {
-            PusherDown(Pusher_status); //down
+            PusherDown(150);
         }
+        PusherStop();
+        delay(100);
+        PusherUp_slow(); //up
+        delay(1300); //水平
         PusherStop();
     }
 }
@@ -516,15 +519,6 @@ void throwing_basketball_three(int& time , int& status)
     {
         if(status == 1)
         {
-            while(digitalRead(pusherLimswit) == 1)
-            {
-                PusherDown(Pusher_status); //down
-            }
-            PusherStop();
-            delay(150);
-            PusherUp_fast(); //up
-            delay(1000);
-            PusherStop();
             status = 2;
             start_time = millis();
         }
@@ -537,7 +531,7 @@ void throwing_basketball_three(int& time , int& status)
             status = 3;
             start_time = millis();
         }
-        else if(status == 3 and duration < 8500 ) //秒數待訂
+        else if(status == 3 and duration < 4000 ) //將時間長更改至只射出一顆球   
         {
             //downDC , topStepper , flywheel be activated at the same time 
             MOTstatus = 2;
@@ -545,18 +539,95 @@ void throwing_basketball_three(int& time , int& status)
             topStepper_task(MOTstatus);
             flywheel_task(2);
         }
-        else if(status == 3 and duration > 8500)
+        else if(status == 3 and duration > 4000)
         {   
             MOTstatus = 1;
             downDC_task(MOTstatus); 
             topStepper_task(MOTstatus);
             flywheel_task(1);
             Serial.println(message);
-            topStepper_status = 3;
-            downDC_status = 3;
             status = 0;
             time = 0;
         }
+    }
+    else if(time == 2)
+    {
+        if(status == 1)
+        {
+            PusherUp();
+            delay(2000); 
+            PusherStop();
+            delay(200);
+            PusherDown_task(Pusher_status);
+            // delay(1440);
+            delay(800);
+            PusherStop();
+            status = 2;
+            start_time = millis();
+        }
+        else if(status == 2 and duration < 4000 ) 
+        {
+            flywheel_task(2);
+        }
+        else if(status == 2 and duration > 4000 )
+        {
+            status = 3;
+            start_time = millis();
+        }
+        else if(status == 3 and duration < 6900 )
+        {
+            //downDC , topStepper , flywheel be activated at the same time 
+            int Motstatus = 2;
+            downDC_forward_fast(Motstatus); 
+            topStepper_task(Motstatus);
+            flywheel_task(2);
+        }
+        else if(status == 3 and duration > 6900 )
+        {
+            int DCstatus = 1;
+            downDC_task(DCstatus); 
+            flywheel_task(1);
+            Serial.println(message);
+            status = 0;
+        }
+    }
+    else if(time == 3)
+    {
+        if(status ==1)
+        {
+            PusherUp();
+            delay(1000); 
+            PusherStop();
+            status = 2;
+        }
+        if(status == 2 and duration < 3000)
+        {
+            flywheel_task(2); 
+        }
+        else if(status == 2 and duration > 3000)
+        {
+            status = 3;
+            start_time = millis();
+        }
+        else if(status == 3 and duration < 3250 ) 
+        {
+            //downDC , topStepper , flywheel be activated at the same time 
+            int DCstatus = 2;
+            downDC_task(DCstatus); 
+            int STstatus = 2;
+            topStepper_task(STstatus);
+            flywheel_task(2);
+        }
+        else if(status == 3 and duration > 3250)
+        {
+            int STstatus = 1;
+            topStepper_task(STstatus);
+            int DCstatus = 1;
+            downDC_task(DCstatus); 
+            flywheel_task(1);
+            status = 0;
+            Serial.println(message);
+        }    
     }
 }
 
@@ -594,7 +665,7 @@ void takeBowling_three(int& time)
         analogWrite(downDC_ENA, 0);
         while(digitalRead(pusherLimswit) == 1)
         {
-            PusherDown(Pusher_status); //down
+            PusherDown(150); //down
         }
         PusherStop();
         delay(2500);
@@ -607,7 +678,10 @@ void takeBowling_three(int& time)
     {
         while(digitalRead(pusherLimswit) == 1)
         {
-            PusherDown(Pusher_status); //down
+            //down
+            digitalWrite(Pusher_IN1, LOW);
+            digitalWrite(Pusher_IN2, HIGH);
+            analogWrite(Pusher_ENA, 150);
         }
         PusherStop();
         delay(2500);
@@ -620,7 +694,10 @@ void takeBowling_three(int& time)
     {
         while(digitalRead(pusherLimswit) == 1)
         {
-            PusherDown(Pusher_status); //down
+            //down
+            digitalWrite(Pusher_IN1, LOW);
+            digitalWrite(Pusher_IN2, HIGH);
+            analogWrite(Pusher_ENA, 150);
         }
         PusherStop();
         delay(300);
@@ -634,7 +711,10 @@ void takeBowling_three(int& time)
         delay(3000);
         while(digitalRead(pusherLimswit) == 1)
         {
-            PusherDown(Pusher_status); //down
+            //down
+            digitalWrite(Pusher_IN1, LOW);
+            digitalWrite(Pusher_IN2, HIGH);
+            analogWrite(Pusher_ENA, 150);
         }
         PusherStop();
         PusherUp_slow(); //up
@@ -643,61 +723,12 @@ void takeBowling_three(int& time)
     }
 }
 
-void pre_taking_bowling()
-{
-    PusherUp_fast(); //up
-    delay(5000);
-    PusherStop(); //stop
-    while(digitalRead(downbLimswit) == 1)
-        {
-            while(digitalRead(downbLimswit) == 1)
-            {
-               //backward
-               digitalWrite(downDC_IN1, LOW);
-               digitalWrite(downDC_IN2, HIGH);
-               analogWrite(downDC_ENA, 200);
-            }
-        }
-        digitalWrite(downDC_IN1, LOW);
-        digitalWrite(downDC_IN2, LOW);
-        analogWrite(downDC_ENA, 0);
-        delay(100);
-        while(digitalRead(downbLimswit) == 0)
-        {
-            //forward
-            digitalWrite(downDC_IN1, HIGH);
-            digitalWrite(downDC_IN2, LOW);
-            analogWrite(downDC_ENA, 200);
-        }
-        digitalWrite(downDC_IN1, LOW);
-        digitalWrite(downDC_IN2, LOW);
-        analogWrite(downDC_ENA, 0);
-    Serial.println(message);
-}
-
-void horizon_pusher()
-{
-    while(digitalRead(pusherLimswit) == 1)
-    {
-        // pusher down
-        digitalWrite(Pusher_IN1, LOW);
-        digitalWrite(Pusher_IN2, HIGH);
-        analogWrite(Pusher_ENA, 150);
-    }
-    PusherStop();
-    delay(100);
-    PusherUp_slow(); //up
-    delay(1300); //水平
-    PusherStop();
-    Serial.println(message);
-}
-
 //take bowlingball (take one ball at a time)
 void takeBowling_once() 
 {
     while(digitalRead(pusherLimswit) == 1)
     {
-        PusherDown(Pusher_status); //down
+        PusherDown(150); //down
     }
     PusherStop();
     delay(2500);
@@ -1137,6 +1168,7 @@ void throwing_basketball_Two_One(int& time , int& status)
 }
 
 //throw basketball (throw one ball at a time)
+//always fail
 void throwing_basketball_three(int& time , int& status)
 {
     int duration = millis()-start_time ;
@@ -1248,6 +1280,55 @@ void throwing_basketball_three(int& time , int& status)
             StandardPosi();  
         }
     }
+}
+
+void pre_taking_bowling()
+{
+    PusherUp_fast(); //up
+    delay(5000);
+    PusherStop(); //stop
+    while(digitalRead(downbLimswit) == 1)
+        {
+            while(digitalRead(downbLimswit) == 1)
+            {
+               //backward
+               digitalWrite(downDC_IN1, LOW);
+               digitalWrite(downDC_IN2, HIGH);
+               analogWrite(downDC_ENA, 200);
+            }
+        }
+        digitalWrite(downDC_IN1, LOW);
+        digitalWrite(downDC_IN2, LOW);
+        analogWrite(downDC_ENA, 0);
+        delay(100);
+        while(digitalRead(downbLimswit) == 0)
+        {
+            //forward
+            digitalWrite(downDC_IN1, HIGH);
+            digitalWrite(downDC_IN2, LOW);
+            analogWrite(downDC_ENA, 200);
+        }
+        digitalWrite(downDC_IN1, LOW);
+        digitalWrite(downDC_IN2, LOW);
+        analogWrite(downDC_ENA, 0);
+    Serial.println(message);
+}
+
+void horizon_pusher()
+{
+    while(digitalRead(pusherLimswit) == 1)
+    {
+        // pusher down
+        digitalWrite(Pusher_IN1, LOW);
+        digitalWrite(Pusher_IN2, HIGH);
+        analogWrite(Pusher_ENA, 150);
+    }
+    PusherStop();
+    delay(100);
+    PusherUp_slow(); //up
+    delay(1300); //水平
+    PusherStop();
+    Serial.println(message);
 }
 
 //throw bowling ball (throw one ball at a time)
