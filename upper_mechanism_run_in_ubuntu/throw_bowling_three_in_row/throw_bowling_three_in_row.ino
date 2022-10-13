@@ -595,9 +595,6 @@ void throwing_basketball_three(int& time , int& status)
     {
         if(status ==1)
         {
-            PusherUp();
-            delay(1000); 
-            PusherStop();
             status = 2;
         }
         if(status == 2 and duration < 3000)
