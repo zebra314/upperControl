@@ -555,7 +555,7 @@ void throwing_basketball_three(int& time , int& status)
         if(status == 1)
         {
             PusherUp();
-            delay(2000); 
+            delay(6000); 
             PusherStop();
             delay(200);
             PusherDown_task(Pusher_status);
