@@ -186,7 +186,7 @@ void downDC_forward(int& status ,int speed)
         while(digitalRead(downfLimswit) == 0)
         {
             // backward
-            downDC_Go(-1,220)
+            downDC_Go(-1,220);
         }
         status = 1;
     }
@@ -227,7 +227,7 @@ void downDC_task(int& status)
     }
     else if (status == 3) // backward
     {
-        downDC_backward(status,150);
+        downDC_backward(status);
     }
 }
 
@@ -323,7 +323,7 @@ void PusherDown_fast(int& status)
     }
     else if(digitalRead(pusherLimswit) == 0)
     {
-        Pusher_Go()
+        Pusher_Go(0,0);
         delay(100);
         while(digitalRead(pusherLimswit) == 0)
         {
@@ -482,6 +482,7 @@ void takeBasket_three(int& time)
 void throwing_basketball_three(int& time , int& status)
 {
     int duration = millis()-start_time ;
+    int MOTstatus = 0;
     if(time == 1)
     {
         if(status == 1)
@@ -522,12 +523,9 @@ void throwing_basketball_three(int& time , int& status)
     {
         if(status == 1)
         {
-<<<<<<< HEAD
             MOTstatus = 3;
             Pusher_task(MOTstatus);
-=======
             Pusher_Go(1,150);
->>>>>>> d4d4683e3e1f0d507f6602cf13bb38e24bf7f75e
             delay(6000); 
             Pusher_Go(0,0);
             delay(200);
@@ -551,20 +549,17 @@ void throwing_basketball_three(int& time , int& status)
         else if(status == 3 and duration < 3750 )
         {
             //downDC , topStepper , flywheel be activated at the same time 
-<<<<<<< HEAD
             MOTstatus = 2;
-            downDC_forward_fast(MOTstatus); 
+            downDC_forward(MOTstatus,250); 
             topStepper_task(MOTstatus);
-=======
-            downDC_task(2); 
+            downDC_task(MOTstatus); 
             topStepper_Go(1);
->>>>>>> d4d4683e3e1f0d507f6602cf13bb38e24bf7f75e
             flywheel_task(2);
         }
         else if(status == 3 and duration > 3750 )
         {
             downDC_status = 1;
-            downDC_Go(1); 
+            downDC_Go(1,150); 
             flywheel_task(1);
             Serial.println(message);
             status = 0;
@@ -597,7 +592,7 @@ void throwing_basketball_three(int& time , int& status)
             {
                 while(digitalRead(downfLimswit) == 0)
                 {
-                    downDC_backward(DCstatus);
+                    downDC_Go(-1,220);
                 }
                 status = 0;
                 int STstatus = 1;
@@ -692,11 +687,10 @@ void takeBowling_three(int& time)
             //down
             Pusher_Go(-1,150);
         }
-<<<<<<< HEAD
-        PusherStop();
-        PusherUp_slow(); //up
+        Pusher_Go(0,0);
+        Pusher_Go(1,100); //up
         delay(1300); //水平
-        PusherStop();
+        Pusher_Go(0,0);
     }
 }
 
@@ -705,14 +699,12 @@ void takeBowling_once() //
 {
     while(digitalRead(pusherLimswit) == 1)
     {
-        PusherDown(150); //down
-=======
+        Pusher_Go(-1,150); //down
         Pusher_Go(0,0);
         delay(100);
         Pusher_Go(1,90); //up
         delay(1300);  //水平
         Pusher_Go(0,0);
->>>>>>> d4d4683e3e1f0d507f6602cf13bb38e24bf7f75e
     }
 }
 
@@ -799,7 +791,7 @@ void releasing_bowling(int& time , int& status)
             delay(100);
             Pusher_Go(1,250);; //down
             Motstatus = 2 ;
-            downDC_forward(Motstatus); 
+            downDC_task(Motstatus); 
             delay(1200);
             Pusher_Go(0,0);
             status = 2;
@@ -838,13 +830,10 @@ void releasing_bowling(int& time , int& status)
             {
                 Pusher_Go(1,90);; //down
             }
-<<<<<<< HEAD
-            PusherStop();
+            Pusher_Go(0,0);
             StandardPosi();
-=======
             Pusher_Go(0,0);
             Serial.println(message);
->>>>>>> d4d4683e3e1f0d507f6602cf13bb38e24bf7f75e
             status = 2;
             time = 0;
         }
