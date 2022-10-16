@@ -547,14 +547,14 @@ void throwing_basketball_three(int& time , int& status)
             flywheel_task(1);
             Serial.println(message);
             status = 0;
-            time = 0;
         }
     }
     else if(time == 2)
     {
         if(status == 1)
         {
-            PusherUp();
+            MOTstatus = 3;
+            Pusher_task(MOTstatus);
             delay(6000); 
             PusherStop();
             delay(200);
@@ -574,15 +574,15 @@ void throwing_basketball_three(int& time , int& status)
             status = 3;
             start_time = millis();
         }
-        else if(status == 3 and duration < 6900 )
+        else if(status == 3 and duration < 3750 )
         {
             //downDC , topStepper , flywheel be activated at the same time 
-            int Motstatus = 2;
-            downDC_forward_fast(Motstatus); 
-            topStepper_task(Motstatus);
+            MOTstatus = 2;
+            downDC_forward_fast(MOTstatus); 
+            topStepper_task(MOTstatus);
             flywheel_task(2);
         }
-        else if(status == 3 and duration > 6900 )
+        else if(status == 3 and duration > 3750 )
         {
             int DCstatus = 1;
             downDC_task(DCstatus); 
@@ -606,7 +606,7 @@ void throwing_basketball_three(int& time , int& status)
             status = 3;
             start_time = millis();
         }
-        else if(status == 3 and duration < 3250 ) 
+        else if(status == 3 and duration < 3000 ) 
         {
             //downDC , topStepper , flywheel be activated at the same time 
             int DCstatus = 2;
@@ -614,8 +614,23 @@ void throwing_basketball_three(int& time , int& status)
             int STstatus = 2;
             topStepper_task(STstatus);
             flywheel_task(2);
+            if(digitalRead(downfLimswit) == 0)
+            {
+                while(digitalRead(downfLimswit) == 0)
+                {
+                    downDC_backward(DCstatus);
+                }
+                status = 0;
+                int STstatus = 1;
+                topStepper_task(STstatus);
+                int DCstatus = 1;
+                downDC_task(DCstatus); 
+                flywheel_task(1);
+                status = 0;
+                Serial.println(message);
+            }
         }
-        else if(status == 3 and duration > 3250)
+        else if(status == 3 and duration > 3000)
         {
             int STstatus = 1;
             topStepper_task(STstatus);
@@ -705,7 +720,7 @@ void takeBowling_three(int& time)
         time = 0;
 
         //to make camera able to face the card board
-        delay(3000);
+        delay(4000);
         while(digitalRead(pusherLimswit) == 1)
         {
             //down
@@ -721,7 +736,7 @@ void takeBowling_three(int& time)
 }
 
 //take bowlingball (take one ball at a time)
-void takeBowling_once() 
+void takeBowling_once() //
 {
     while(digitalRead(pusherLimswit) == 1)
     {
@@ -859,7 +874,7 @@ void releasing_bowling(int& time , int& status)
                 PusherUp_slow(); //down
             }
             PusherStop();
-            Serial.println(message);
+            StandardPosi();
             status = 2;
             time = 0;
         }
@@ -882,7 +897,7 @@ void action(String message)
             // takeBasket_Two_One(takeBasket_times);
             break;
         case '2': 
-            throwBasket_times++;
+            throwBasket_times ++;
             throwBasket_status = 1;
             start_time = millis();
             break;
