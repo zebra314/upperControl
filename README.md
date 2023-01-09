@@ -6,7 +6,7 @@
 Itron
 
 ## Project
-Building this robot to accomplish the tasks in TDK conpetition.
+Building this robot to accomplish the tasks in TDK competition.
 
 ## Purpose
 This ROS package is responsible for communicating between Arduino and nuc.
